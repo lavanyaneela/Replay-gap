@@ -1,0 +1,16 @@
+{
+  "mermaid": "node_modules/mermaid/dist/mermaid.min.js",
+  "diagrams": [
+    {
+      "name": "architecture-1",
+      "file": "docs/diagrams/architecture-1.svg",
+      "viewbox": "4 3.9999961853027344 764.1484375 971.2000732421875",
+      "bytes": 36303,
+      "html_labels": false,
+      "background": "painted",
+      "loads_as_image": true,
+      "natural_width": 764,
+      "natural_height": 971
+    }
+  ]
+}

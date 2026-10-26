@@ -1,0 +1,30 @@
+{
+  "report": "reports/evaluation.html",
+  "verdict_badge": {
+    "text": "NO",
+    "colour": "rgb(255, 255, 255)",
+    "background": "rgb(90, 100, 113)",
+    "contrast_ratio": 6.01,
+    "minimum_required": 3.0,
+    "legible": true
+  },
+  "shots": [
+    {
+      "name": "report-table",
+      "file": "docs/evidence/report-table.png",
+      "framed_by": "Estimated lift over the deployed ranker",
+      "framed_until": "the end of the page",
+      "height_px": 436,
+      "bytes": 255811
+    },
+    {
+      "name": "report-full",
+      "file": "docs/evidence/report-full.png",
+      "framed_by": "the whole document",
+      "framed_until": "the end of the page",
+      "height_px": 604,
+      "bytes": 357434
+    }
+  ],
+  "note": "Each shot is framed by a named heading read from the live document, never by a pixel offset, and the run fails if a named heading is gone or if the verdict badge is not legible against its own background."
+}

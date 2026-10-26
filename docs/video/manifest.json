@@ -1,0 +1,48 @@
+{
+  "note": "A replay, not a screen capture. Every line of terminal text is real captured stdout from the command above it, each segment is paced by that command's measured wall time, and the exit codes are the exit codes those commands actually returned.",
+  "warmup": "replay-gap policies",
+  "segments": [
+    {
+      "command": "replay-gap diagnose",
+      "caption": "The log, before any candidate policy is involved.",
+      "exit_code": 0,
+      "duration_seconds": 1.425,
+      "stdout_lines": 27
+    },
+    {
+      "command": "replay-gap evaluate incumbent --no-ranker",
+      "caption": "The deployed ranker, replayed against the log it produced.",
+      "exit_code": 1,
+      "duration_seconds": 18.568,
+      "stdout_lines": 15
+    },
+    {
+      "command": "replay-gap evaluate contrarian_sharp --no-ranker",
+      "caption": "The same ranker as contrarian_lift, served greedily. The tool refuses.",
+      "exit_code": 2,
+      "duration_seconds": 18.475,
+      "stdout_lines": 15
+    },
+    {
+      "command": "replay-gap compare --no-ranker --gap",
+      "caption": "Every policy, scored as error against the exact referee.",
+      "exit_code": 2,
+      "duration_seconds": 34.816,
+      "stdout_lines": 12
+    },
+    {
+      "command": "python tools/check_numbers.py --strict-reverse",
+      "caption": "Every published figure, re-checked.",
+      "exit_code": 0,
+      "duration_seconds": 0.064,
+      "stdout_lines": 2
+    }
+  ],
+  "outputs": {
+    "webm": "docs/video/demo.webm",
+    "mp4": "docs/video/demo.mp4",
+    "mp4_bytes": 270396,
+    "gif": "docs/video/demo.gif",
+    "gif_bytes": 1701709
+  }
+}
