@@ -27,7 +27,93 @@
   "best_minimum_detectable_lift": 0.0014605441821662168,
   "median_minimum_detectable_lift": 0.020926366958518173,
   "policies_above_target": 5,
-  "seconds": 18.931577760000437,
+  "seconds": 19.690572681999583,
+  "by_policy": {
+    "incumbent": {
+      "policy": "incumbent",
+      "true_lift": 0.0,
+      "snips_lift": 0.0,
+      "snips_standard_error": 0.0,
+      "minimum_detectable_lift": 0.0,
+      "naive_minimum_detectable_lift": 0.012462345194908991,
+      "ess_fraction": 1.0,
+      "sessions_for_one_percent": 0,
+      "degenerate": true,
+      "true_lift_is_detectable": false
+    },
+    "incumbent_clone": {
+      "policy": "incumbent_clone",
+      "true_lift": -0.00047334027392798017,
+      "snips_lift": 0.0009311942819318908,
+      "snips_standard_error": 0.0005213277728349733,
+      "minimum_detectable_lift": 0.0014605441821662168,
+      "naive_minimum_detectable_lift": 0.012361178757487228,
+      "ess_fraction": 0.9714548553914721,
+      "sessions_for_one_percent": 1067,
+      "degenerate": false,
+      "true_lift_is_detectable": false
+    },
+    "popularity": {
+      "policy": "popularity",
+      "true_lift": -0.01635488119518369,
+      "snips_lift": -0.0037332435925022667,
+      "snips_standard_error": 0.005793310877321808,
+      "minimum_detectable_lift": 0.01623045411783785,
+      "naive_minimum_detectable_lift": 0.016361630693609377,
+      "ess_fraction": 0.22707237845394185,
+      "sessions_for_one_percent": 131714,
+      "degenerate": false,
+      "true_lift_is_detectable": true
+    },
+    "uniform": {
+      "policy": "uniform",
+      "true_lift": -0.13679488242711113,
+      "snips_lift": -0.1241573164860873,
+      "snips_standard_error": 0.007541618230084922,
+      "minimum_detectable_lift": 0.021128486154057206,
+      "naive_minimum_detectable_lift": 0.029138101650706072,
+      "ess_fraction": 0.1379985117055563,
+      "sessions_for_one_percent": 223207,
+      "degenerate": false,
+      "true_lift_is_detectable": true
+    },
+    "contrarian_lift": {
+      "policy": "contrarian_lift",
+      "true_lift": 0.08025583191996244,
+      "snips_lift": 0.07871682495499188,
+      "snips_standard_error": 0.01094611162650182,
+      "minimum_detectable_lift": 0.030666464528622,
+      "naive_minimum_detectable_lift": 0.02857118007758787,
+      "ess_fraction": 0.07893923638410745,
+      "sessions_for_one_percent": 470217,
+      "degenerate": false,
+      "true_lift_is_detectable": true
+    },
+    "contrarian_sharp": {
+      "policy": "contrarian_sharp",
+      "true_lift": 0.21532026712224628,
+      "snips_lift": 0.25965875036311736,
+      "snips_standard_error": 0.02705210034760323,
+      "minimum_detectable_lift": 0.0757887644527539,
+      "naive_minimum_detectable_lift": 0.02857118007758787,
+      "ess_fraction": 0.01620035785542304,
+      "sessions_for_one_percent": 2871969,
+      "degenerate": false,
+      "true_lift_is_detectable": true
+    },
+    "oracle": {
+      "policy": "oracle",
+      "true_lift": 0.12565124681730633,
+      "snips_lift": 0.116842767421798,
+      "snips_standard_error": 0.007397329065341848,
+      "minimum_detectable_lift": 0.02072424776297914,
+      "naive_minimum_detectable_lift": 0.018017435313172504,
+      "ess_fraction": 0.1617257409099137,
+      "sessions_for_one_percent": 214748,
+      "degenerate": false,
+      "true_lift_is_detectable": true
+    }
+  },
   "rows": [
     {
       "policy": "incumbent",

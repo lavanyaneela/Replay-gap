@@ -139,6 +139,7 @@ def run() -> dict:
             1 for row in informative if row["minimum_detectable_lift"] > TARGET_LIFT
         ),
         "seconds": timer.seconds,
+        "by_policy": {row["policy"]: row for row in rows},
         "rows": rows,
     }
     write_result(NAME, payload)

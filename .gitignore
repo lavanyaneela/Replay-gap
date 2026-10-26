@@ -18,8 +18,15 @@ reports/
 mlruns/
 mlartifacts/
 
-docs/evidence/*.png
+# The evidence the README embeds is committed: a reviewer should see it without running
+# anything. Only the intermediate webm is ignored, because the mp4 and the gif are derived
+# from it and it is the largest of the three.
 docs/video/*.webm
-docs/video/*.mp4
+
+# Mermaid is a build time dependency of tools/render_diagrams.py only. The rendered SVG is
+# committed, so a reviewer never needs this and a clone should not carry it.
+node_modules/
+package-lock.json
+package.json
 
 .DS_Store

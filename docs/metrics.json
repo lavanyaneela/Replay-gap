@@ -1,0 +1,395 @@
+{
+  "metrics": {
+    "tests_total": 355,
+    "tests_executed": 354,
+    "coverage_line_pct": 1.0,
+    "incumbent_naive_lift": 0.05525198631872463,
+    "incumbent_naive_matched": 17187,
+    "incumbent_match_rate": 0.34374,
+    "log_sessions": 50000,
+    "sharp_ess": 810.017892771152,
+    "sharp_ess_fraction": 0.01620035785542304,
+    "sharp_snips_lift": 0.25965875036311736,
+    "sharp_ips_lift": -0.09950063647749952,
+    "sharp_true_lift": 0.21532026712224628,
+    "clone_snips_lift": 0.0009311942819318908,
+    "clone_true_lift": -0.00047334027392798017,
+    "clone_ess_fraction": 0.9714548553914721,
+    "units_error_lift": -0.38021959526202853,
+    "sharp_match_rate": 0.08684,
+    "sharp_naive_lift": 0.19640559699768634,
+    "e1_scenarios": 180,
+    "e1_decisive": 166,
+    "e1_naive_sign_disagreement_rate": 0.2710843373493976,
+    "e1_naive_sign_disagreements": 45,
+    "e1_snips_sign_disagreement_rate": 0.018072289156626505,
+    "e1_naive_overclaim_rate": 0.9611111111111111,
+    "e1_worst_true_lift": -0.10795018110061516,
+    "e1_worst_naive_lift": 0.06244238844696315,
+    "e1_worst_gap": 0.1703925695475783,
+    "e2_end_ess_fraction": 0.16172574090991368,
+    "e2_collapse_factor": 6.183307582167958,
+    "e2_end_ess_fraction_sharpened": 0.016200357855423037,
+    "e2_naive_lift_at_end": 0.18200372412720345,
+    "e2_true_lift_at_end": 0.1256512468173061,
+    "e3_replicates": 24,
+    "e3_popularity_true_lift": -0.022345409040871306,
+    "e3_popularity_naive_sign_errors": 24,
+    "e3_serving_true_gap": 0.16389657828408322,
+    "e3_oracle_sharp_snips_rmse": 0.037754573185406724,
+    "e3_oracle_sharp_dr_rmse": 0.04437602410265831,
+    "e4_worst_detectable": 0.0757887644527539,
+    "e4_median_detectable": 0.020926366958518173,
+    "e4_policies_above_target": 5,
+    "e4_informative_policies": 6,
+    "e4_worst_sessions": 2871969,
+    "e5_crossover_factor": 3.0,
+    "e5_ess_at_crossover": 0.1229554634476748,
+    "e5_crossings_where_ess_rose": 3,
+    "e5_crossed": 3
+  },
+  "formatted": {
+    "tests_total": "355",
+    "tests_executed": "354",
+    "coverage_line_pct": "100%",
+    "incumbent_naive_lift": "+5.53%",
+    "incumbent_naive_matched": "17,187",
+    "incumbent_match_rate": "34.4%",
+    "log_sessions": "50,000",
+    "sharp_ess": "810",
+    "sharp_ess_fraction": "1.62%",
+    "sharp_snips_lift": "+25.97%",
+    "sharp_ips_lift": "-9.95%",
+    "sharp_true_lift": "+21.53%",
+    "clone_snips_lift": "+0.09%",
+    "clone_true_lift": "-0.05%",
+    "clone_ess_fraction": "97%",
+    "units_error_lift": "-38.02%",
+    "sharp_match_rate": "8.7%",
+    "sharp_naive_lift": "+19.64%",
+    "e1_scenarios": "180",
+    "e1_decisive": "166",
+    "e1_naive_sign_disagreement_rate": "27.1%",
+    "e1_naive_sign_disagreements": "45",
+    "e1_snips_sign_disagreement_rate": "1.8%",
+    "e1_naive_overclaim_rate": "96%",
+    "e1_worst_true_lift": "-10.80%",
+    "e1_worst_naive_lift": "+6.24%",
+    "e1_worst_gap": "17.04%",
+    "e2_end_ess_fraction": "16.17%",
+    "e2_collapse_factor": "6",
+    "e2_end_ess_fraction_sharpened": "1.62%",
+    "e2_naive_lift_at_end": "+18.20%",
+    "e2_true_lift_at_end": "+12.57%",
+    "e3_replicates": "24",
+    "e3_popularity_true_lift": "-2.23%",
+    "e3_popularity_naive_sign_errors": "24",
+    "e3_serving_true_gap": "16.39%",
+    "e3_oracle_sharp_snips_rmse": "3.78%",
+    "e3_oracle_sharp_dr_rmse": "4.44%",
+    "e4_worst_detectable": "7.58%",
+    "e4_median_detectable": "2.09%",
+    "e4_policies_above_target": "5",
+    "e4_informative_policies": "6",
+    "e4_worst_sessions": "2,871,969",
+    "e5_crossover_factor": "3.0",
+    "e5_ess_at_crossover": "12.3%",
+    "e5_crossings_where_ess_rose": "3",
+    "e5_crossed": "3"
+  },
+  "anchors": {
+    "tests_total": [
+      "355 tests"
+    ],
+    "tests_executed": [
+      "354 of them run",
+      "354 tests run"
+    ],
+    "coverage_line_pct": [
+      "100% line coverage",
+      "coverage at 100%"
+    ],
+    "incumbent_naive_lift": [
+      "+5.53% better than itself",
+      "log reports +5.53%",
+      "replay lift +5.53%"
+    ],
+    "incumbent_naive_matched": [
+      "17,187 sessions",
+      "on 17,187 of"
+    ],
+    "incumbent_match_rate": [
+      "34.4% of the log"
+    ],
+    "log_sessions": [
+      "50,000 session",
+      "50,000 logged sessions"
+    ],
+    "sharp_ess": [
+      "810 of",
+      "worth 810 sessions"
+    ],
+    "sharp_ess_fraction": [
+      "sample size is 1.62%",
+      "ends at 1.62%",
+      "1.62% of the log"
+    ],
+    "sharp_snips_lift": [
+      "would have reported +25.97%",
+      "SNIPS says +25.97%"
+    ],
+    "sharp_ips_lift": [
+      "IPS reports -9.95%",
+      "IPS says -9.95%"
+    ],
+    "sharp_true_lift": [
+      "true lift is +21.53%",
+      "truth is +21.53%"
+    ],
+    "clone_snips_lift": [
+      "ship at +0.09%",
+      "calls it +0.09%",
+      "SNIPS says +0.09%"
+    ],
+    "clone_true_lift": [
+      "true lift of -0.05%",
+      "actually -0.05%"
+    ],
+    "clone_ess_fraction": [
+      "97% of the log",
+      "at 97% effective"
+    ],
+    "units_error_lift": [
+      "reporting -38.02% for",
+      "plausible looking -38.02%"
+    ],
+    "sharp_match_rate": [
+      "first slot in 8.7% of",
+      "8.7% of the log"
+    ],
+    "sharp_naive_lift": [
+      "replay lift +19.64%",
+      "replay reports +19.64%"
+    ],
+    "e1_scenarios": [
+      "180 candidate rankers",
+      "180 sampled rankers"
+    ],
+    "e1_decisive": [
+      "of 166 decisive",
+      "166 decisive"
+    ],
+    "e1_naive_sign_disagreement_rate": [
+      "27.1% of decisive",
+      "sign in 27.1%",
+      "wrong in 27.1%"
+    ],
+    "e1_naive_sign_disagreements": [
+      "45 of",
+      "in 45 of"
+    ],
+    "e1_snips_sign_disagreement_rate": [
+      "SNIPS 1.8%",
+      "to 1.8%"
+    ],
+    "e1_naive_overclaim_rate": [
+      "96% of scenarios",
+      "above the truth in 96%"
+    ],
+    "e1_worst_true_lift": [
+      "true lift is -10.80%",
+      "worth -10.80%"
+    ],
+    "e1_worst_naive_lift": [
+      "read as +6.24%",
+      "replay said +6.24%"
+    ],
+    "e1_worst_gap": [
+      "gap of 17.04%",
+      "17.04% apart"
+    ],
+    "e2_end_ess_fraction": [
+      "falls to 16.17%",
+      "16.17% of its nominal"
+    ],
+    "e2_collapse_factor": [
+      "factor of 6",
+      "6 times smaller"
+    ],
+    "e2_end_ess_fraction_sharpened": [
+      "ends at 1.62%",
+      "down to 1.62%"
+    ],
+    "e2_naive_lift_at_end": [
+      "still reports +18.20%",
+      "reports +18.20% at"
+    ],
+    "e2_true_lift_at_end": [
+      "truth is +12.57%",
+      "true lift is +12.57%"
+    ],
+    "e3_replicates": [
+      "24 replicates",
+      "all 24 replicates",
+      "24 independent"
+    ],
+    "e3_popularity_true_lift": [
+      "true lift is -2.23%",
+      "worth -2.23% to"
+    ],
+    "e3_popularity_naive_sign_errors": [
+      "24 of",
+      "all 24 "
+    ],
+    "e3_serving_true_gap": [
+      "differ by 16.39%",
+      "16.39% apart"
+    ],
+    "e3_oracle_sharp_snips_rmse": [
+      "SNIPS at 3.78%",
+      "3.78% against"
+    ],
+    "e3_oracle_sharp_dr_rmse": [
+      "4.44% for the doubly robust",
+      "doubly robust at 4.44%"
+    ],
+    "e4_worst_detectable": [
+      "resolve 7.58%",
+      "below 7.58%",
+      "worst case is 7.58%"
+    ],
+    "e4_median_detectable": [
+      "median of 2.09%",
+      "typically 2.09%"
+    ],
+    "e4_policies_above_target": [
+      "5 of",
+      "for 5 of"
+    ],
+    "e4_informative_policies": [
+      "of 6 policies",
+      "of the 6 "
+    ],
+    "e4_worst_sessions": [
+      "2,871,969 sessions",
+      "about 2,871,969 "
+    ],
+    "e5_crossover_factor": [
+      "factor of 3.0",
+      "at 3.0 the"
+    ],
+    "e5_ess_at_crossover": [
+      "reads 12.3%",
+      "still 12.3%"
+    ],
+    "e5_crossings_where_ess_rose": [
+      "3 of",
+      "in all 3 "
+    ],
+    "e5_crossed": [
+      "of 3 ",
+      "all 3 "
+    ]
+  },
+  "rows": {
+    "e1_error_row_naive": "| mean signed error | +5.04% | +0.33% |",
+    "e1_error_row_absolute": "| mean absolute error | 5.06% | 1.21% |",
+    "e3_serving_row_mild": "| oracle, served stochastically | +12.21% | +16.84% |",
+    "e3_serving_row_sharp": "| oracle, served greedily | +28.59% | +16.84% |",
+    "e2_row_00": "| 0% | +0.00% | +5.53% | +0.00% | 50,000 | 1 |",
+    "e2_row_03": "| 25% | +4.84% | +8.23% | +4.87% | 42,160 | 7 |",
+    "e2_row_06": "| 50% | +9.17% | +11.81% | +9.05% | 23,223 | 36 |",
+    "e2_row_09": "| 75% | +11.83% | +15.55% | +11.24% | 12,271 | 116 |",
+    "e2_row_12": "| 100% | +12.57% | +18.20% | +11.68% | 8,086 | 311 |",
+    "e4_row_incumbent_clone": "| incumbent_clone | -0.05% | +0.09% | 0.15% |",
+    "e4_row_popularity": "| popularity | -1.64% | -0.37% | 1.62% |",
+    "e4_row_uniform": "| uniform | -13.68% | -12.42% | 2.11% |",
+    "e4_row_contrarian_lift": "| contrarian_lift | +8.03% | +7.87% | 3.07% |",
+    "e4_row_contrarian_sharp": "| contrarian_sharp | +21.53% | +25.97% | 7.58% |",
+    "e4_row_oracle": "| oracle | +12.57% | +11.68% | 2.07% |",
+    "e3_row_popularity": "| popularity | -2.23% | 10.67% | 4.36% | 2.43% | 1.88% |",
+    "e3_row_oracle": "| oracle | +12.21% | 4.86% | 4.96% | 1.94% | 1.73% |",
+    "e3_row_oracle_sharp": "| oracle, greedily served | +28.59% | 11.87% | 15.38% | 3.78% | 4.44% |",
+    "e3_row_contrarian_lift": "| contrarian_lift | +7.64% | 11.33% | 15.06% | 3.22% | 2.19% |",
+    "e3_row_contrarian_sharp": "| contrarian_sharp | +21.18% | 3.05% | 54.71% | 7.61% | 3.13% |"
+  },
+  "descriptions": {
+    "tests_total": "tests in the suite",
+    "tests_executed": "tests that ran on this machine, excluding the PostgreSQL parity module",
+    "coverage_line_pct": "line coverage of the package",
+    "incumbent_naive_lift": "naive replay's verdict on the deployed ranker, against itself",
+    "incumbent_naive_matched": "sessions naive replay keeps when replaying the deployed ranker",
+    "incumbent_match_rate": "share of the log naive replay keeps for the deployed ranker",
+    "log_sessions": "sessions in the committed log",
+    "sharp_ess": "effective sample size for the greedily served ranker",
+    "sharp_ess_fraction": "effective sample size as a share of the log, greedily served",
+    "sharp_snips_lift": "what SNIPS would have reported for the refused policy",
+    "sharp_ips_lift": "what plain IPS reports for the refused policy",
+    "sharp_true_lift": "the true lift of the refused policy",
+    "clone_snips_lift": "SNIPS on a policy that is a noisy copy of the incumbent",
+    "clone_true_lift": "the true lift of the noisy copy",
+    "clone_ess_fraction": "effective sample size for the noisy copy",
+    "units_error_lift": "what the units error in the war story reported for the deployed ranker",
+    "sharp_match_rate": "share of the log a replay keeps for the greedily served ranker",
+    "sharp_naive_lift": "what a replay reports for the greedily served ranker",
+    "e1_scenarios": "candidate rankers sampled in E1",
+    "e1_decisive": "E1 scenarios whose true lift is large enough to act on",
+    "e1_naive_sign_disagreement_rate": "how often naive replay disagrees with the referee about the sign",
+    "e1_naive_sign_disagreements": "count of sign disagreements in E1",
+    "e1_snips_sign_disagreement_rate": "how often SNIPS disagrees with the referee about the sign",
+    "e1_naive_overclaim_rate": "share of E1 scenarios where naive replay came in above the truth",
+    "e1_worst_true_lift": "true lift of the worst overclaimed ranker",
+    "e1_worst_naive_lift": "what naive replay said about the worst overclaimed ranker",
+    "e1_worst_gap": "the gap on the worst overclaim",
+    "e2_end_ess_fraction": "what the log is worth at the end of the optimistic sweep",
+    "e2_collapse_factor": "how far the log falls on the model axis alone",
+    "e2_end_ess_fraction_sharpened": "what the log is worth once serving is sharpened too",
+    "e2_naive_lift_at_end": "what naive replay still reports at the end of the sweep",
+    "e2_true_lift_at_end": "the truth at the end of the sweep",
+    "e3_replicates": "independent replicates in E3",
+    "e3_popularity_true_lift": "true lift of the popularity baseline",
+    "e3_popularity_naive_sign_errors": "replicates where naive replay got the popularity baseline's sign wrong",
+    "e3_serving_true_gap": "how far apart two serving temperatures of one ranker truly are",
+    "e3_oracle_sharp_snips_rmse": "SNIPS error on the greedily served oracle",
+    "e3_oracle_sharp_dr_rmse": "doubly robust error on the greedily served oracle",
+    "e4_worst_detectable": "the largest minimum detectable lift across the policy set",
+    "e4_median_detectable": "median minimum detectable lift across the policy set",
+    "e4_policies_above_target": "policies whose minimum detectable lift exceeds one percent",
+    "e4_informative_policies": "policies with a usable resolution figure",
+    "e4_worst_sessions": "sessions needed to resolve a one percent lift in the worst case",
+    "e5_crossover_factor": "corruption factor at which the correction stops being worth having",
+    "e5_ess_at_crossover": "what the diagnostic reads at that crossover",
+    "e5_crossings_where_ess_rose": "crossovers where the diagnostic improved as the estimate decayed",
+    "e5_crossed": "policies whose correction stopped being worth having",
+    "e1_error_row_naive": "E1 mean error row for naive replay",
+    "e1_error_row_absolute": "E1 mean absolute error row",
+    "e3_serving_row_mild": "E3 serving blindness row, stochastic",
+    "e3_serving_row_sharp": "E3 serving blindness row, greedy",
+    "e2_row_00": "E2 sweep row at 0% toward true relevance",
+    "e2_row_03": "E2 sweep row at 25% toward true relevance",
+    "e2_row_06": "E2 sweep row at 50% toward true relevance",
+    "e2_row_09": "E2 sweep row at 75% toward true relevance",
+    "e2_row_12": "E2 sweep row at 100% toward true relevance",
+    "e4_row_incumbent_clone": "E4 resolution row for incumbent_clone",
+    "e4_row_popularity": "E4 resolution row for popularity",
+    "e4_row_uniform": "E4 resolution row for uniform",
+    "e4_row_contrarian_lift": "E4 resolution row for contrarian_lift",
+    "e4_row_contrarian_sharp": "E4 resolution row for contrarian_sharp",
+    "e4_row_oracle": "E4 resolution row for oracle",
+    "e3_row_popularity": "E3 estimator comparison row for popularity",
+    "e3_row_oracle": "E3 estimator comparison row for oracle",
+    "e3_row_oracle_sharp": "E3 estimator comparison row for oracle_sharp",
+    "e3_row_contrarian_lift": "E3 estimator comparison row for contrarian_lift",
+    "e3_row_contrarian_sharp": "E3 estimator comparison row for contrarian_sharp"
+  },
+  "checked_documents": [
+    "README.md",
+    "docs/defense-guide.md",
+    "docs/adr/ADR-001-synthetic-world-over-public-dataset.md",
+    "docs/adr/ADR-002-exact-ground-truth-by-slate-enumeration.md",
+    "docs/adr/ADR-003-duckdb-default-postgres-parity.md",
+    "docs/adr/ADR-004-snips-default-and-the-cost-of-clipping.md",
+    "docs/adr/ADR-005-what-this-repository-cannot-establish.md"
+  ],
+  "note": "Every value here was produced by running the test suite, the evaluation and the experiments. Nothing in this file is typed by hand, and tools/check_numbers.py fails the build when a document quotes a figure this file no longer holds."
+}

@@ -5,7 +5,7 @@
 PYTHON ?= python3
 PACKAGE := replay_gap
 
-.PHONY: help install lint format test coverage fixtures experiments receipts verify evidence clean
+.PHONY: help install lint format test fixtures experiments receipts prove-receipts verify evidence clean
 
 help:
 	@echo "install      install the package and its development extras"
@@ -14,6 +14,7 @@ help:
 	@echo "fixtures     regenerate the committed interaction log from its seed"
 	@echo "experiments  run E1 to E5 and write docs/experiments/*.json"
 	@echo "receipts     re-measure every published number and check it against the prose"
+	@echo "prove-receipts  corrupt the README five ways and watch the checker fail each one"
 	@echo "verify       lint + test + receipts. This is the command the README promises."
 	@echo "evidence     regenerate the diagram, screenshots and demo replay (needs extras)"
 
@@ -40,9 +41,18 @@ fixtures:
 experiments:
 	$(PYTHON) tools/run_experiments.py
 
-receipts:
-	$(PYTHON) tools/collect_metrics.py
-	$(PYTHON) tools/check_numbers.py
+# The suite runs as its own step and the collector reads its reports, rather than the collector
+# shelling out to pytest. A red test should surface as a red test, not as a CalledProcessError
+# traceback from inside a metrics script, which costs an hour to attribute.
+reports/coverage.json reports/junit.xml:
+	$(MAKE) test
+
+receipts: reports/coverage.json
+	$(PYTHON) tools/collect_metrics.py --skip-tests
+	$(PYTHON) tools/check_numbers.py --strict-reverse
+
+prove-receipts:
+	bash tools/prove_receipts.sh
 
 verify: lint test receipts
 
