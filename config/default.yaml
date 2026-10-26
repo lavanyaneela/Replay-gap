@@ -1,0 +1,68 @@
+# Every number the repository publishes traces back to a value in this file or to a measurement.
+# Nothing in the source hardcodes a threshold: if a knob matters, it lives here.
+
+seed: 20260301
+
+world:
+  n_items: 200              # catalogue size
+  n_item_features: 8
+  n_segments: 6             # user segments, so a learner has structure to find
+  n_contexts: 5000          # distinct users drawn from those segments
+  relevance_scale: 2.4      # multiplies the context-item dot product inside the sigmoid
+  quality_spread: 0.55      # per-item global quality, which is what a popularity baseline sees
+
+slate:
+  n_candidates: 10          # items retrieved per session, the action space the policy ranks
+  n_positions: 3            # slate length. 10 * 9 * 8 = 720 ordered slates, small enough to enumerate
+  examination: [1.0, 0.55, 0.32]   # probability the user looks at each position
+
+logging_policy:
+  # The deployed ranker's view of the world is a perturbed copy of the truth, which is what makes
+  # the log confounded rather than random.
+  item_embedding_noise: 0.75
+  quality_noise: 0.45
+  temperature: 1.0          # Plackett-Luce temperature over standardised scores
+
+log:
+  n_sessions: 50000
+
+policies:
+  temperature: 1.0          # candidate policies are stochastic too, or every weight would be 0 or inf
+
+ranker:
+  # LightGBM LambdaMART trained on the logged data, counting every un-impressed candidate as a
+  # negative. That is what most teams actually do, and it is part of what the repository measures.
+  n_estimators: 160
+  learning_rate: 0.08
+  num_leaves: 15
+  min_child_samples: 40
+  seed: 11
+
+reward_model:
+  # The outcome model the doubly robust estimator leans on. Fitted on the same confounded log.
+  n_estimators: 120
+  learning_rate: 0.08
+  num_leaves: 15
+  min_child_samples: 40
+  seed: 12
+
+estimators:
+  clip_weight: 20.0         # importance weight cap. ADR-004 prices what this costs.
+  bootstrap_resamples: 400
+  bootstrap_seed: 7
+
+diagnostics:
+  min_ess_fraction: 0.02    # below this the tool refuses rather than estimating
+  max_weight_share: 0.05    # one session owning more than this share of the mass: refuse
+  alpha: 0.05
+  power: 0.8
+
+experiments:
+  e1_scenarios: 180
+  e1_sessions: 8000
+  e1_decisive_lift_pct: 1.0   # below this the true sign is not a decision anyone would act on
+  e2_divergence_steps: 12
+  e3_replicates: 24
+  e3_sessions: 8000
+  e5_factors: [1.0, 1.25, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0]
+  e5_sessions: 8000
