@@ -57,6 +57,7 @@ class LogConfig:
 @dataclass(frozen=True)
 class PoliciesConfig:
     temperature: float = 1.0
+    sharp_temperature: float = 0.25
 
 
 @dataclass(frozen=True)
@@ -139,8 +140,18 @@ class Config:
             raise ConfigError("slate.examination must be non-increasing down the slate")
         if self.world.n_items < s.n_candidates:
             raise ConfigError("world.n_items must be at least slate.n_candidates")
-        if self.logging_policy.temperature <= 0 or self.policies.temperature <= 0:
+        temperatures = (
+            self.logging_policy.temperature,
+            self.policies.temperature,
+            self.policies.sharp_temperature,
+        )
+        if any(t <= 0 for t in temperatures):
             raise ConfigError("a Plackett-Luce temperature must be strictly positive")
+        if self.policies.sharp_temperature >= self.policies.temperature:
+            raise ConfigError(
+                "policies.sharp_temperature must be below policies.temperature, or the sharp "
+                "variant is not sharper"
+            )
         if self.estimators.clip_weight <= 1.0:
             raise ConfigError(
                 "estimators.clip_weight must exceed 1.0 to be a cap rather than a floor"

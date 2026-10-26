@@ -28,6 +28,7 @@ log:
 
 policies:
   temperature: 1.0          # candidate policies are stochastic too, or every weight would be 0 or inf
+  sharp_temperature: 0.25   # the same ranker served greedily, which is what collapses overlap
 
 ranker:
   # LightGBM LambdaMART trained on the logged data, counting every un-impressed candidate as a

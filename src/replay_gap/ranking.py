@@ -15,6 +15,7 @@ silently be a comparison between score scales.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from itertools import permutations
 
 import numpy as np
@@ -96,20 +97,37 @@ def sample_slates(lg: np.ndarray, n_positions: int, rng: np.random.Generator) ->
     return order[:, :n_positions].astype(np.int64)
 
 
+@lru_cache(maxsize=8)
+def _position_selectors(n_candidates: int, n_positions: int) -> tuple[np.ndarray, ...]:
+    """One indicator matrix per position, shape (n_permutations, n_candidates).
+
+    Collapsing the slate distribution onto positions is a sum over permutations grouped by which
+    item each one placed where, and that grouping is fixed by the permutation index. Expressing
+    it as a matrix turns the collapse into a dense product instead of a scatter add over tens of
+    millions of entries, which on a fifty thousand session log was the single slowest operation
+    in the pipeline before it was measured.
+    """
+    perms = permutation_index(n_candidates, n_positions)
+    selectors = []
+    for position in range(n_positions):
+        indicator = np.zeros((perms.shape[0], n_candidates), dtype=np.float64)
+        indicator[np.arange(perms.shape[0]), perms[:, position]] = 1.0
+        selectors.append(indicator)
+    return tuple(selectors)
+
+
 def position_marginals(lg: np.ndarray, perms: np.ndarray) -> np.ndarray:
     """Probability that each candidate lands in each position, summed over every ordered slate.
 
     Returns shape (n_rows, n_positions, n_candidates). This is the exact slate distribution
     collapsed to what the reward actually depends on, which is which item sits where.
     """
-    probabilities = permutation_probabilities(lg, perms)
-    n_rows = lg.shape[0]
-    n_candidates = lg.shape[1]
-    n_positions = perms.shape[1]
-    out = np.zeros((n_rows, n_positions, n_candidates), dtype=np.float64)
-    for position in range(n_positions):
-        np.add.at(out[:, position, :].T, perms[:, position], probabilities.T)
-    return out
+    perms = np.asarray(perms, dtype=np.int64)
+    n_candidates = int(np.asarray(lg).shape[1])
+    probabilities = _permutation_probabilities_t(lg, perms)
+    selectors = _position_selectors(n_candidates, perms.shape[1])
+    stacked = [probabilities.T @ selector for selector in selectors]
+    return np.stack(stacked, axis=1)
 
 
 def permutation_probabilities(lg: np.ndarray, perms: np.ndarray) -> np.ndarray:

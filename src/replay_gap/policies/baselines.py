@@ -169,9 +169,13 @@ class ContrarianPolicy(Policy):
     """
 
     def __init__(
-        self, world: World, logging_policy: LoggingPolicy, temperature: float = 1.0
+        self,
+        world: World,
+        logging_policy: LoggingPolicy,
+        temperature: float = 1.0,
+        name: str = "contrarian_lift",
     ) -> None:
-        self.name = "contrarian_lift"
+        self.name = name
         self.temperature = float(temperature)
         self._world = world
         self._policy = logging_policy
@@ -187,8 +191,16 @@ def build_baseline_policies(
     logging_policy: LoggingPolicy,
     click_counts: np.ndarray,
     temperature: float = 1.0,
+    sharp_temperature: float = 0.25,
 ) -> dict[str, Policy]:
-    """The fixed baseline set, in the order the report prints them."""
+    """The fixed baseline set, in the order the report prints them.
+
+    ``contrarian_sharp`` is the same ranker as ``contrarian_lift``, served at a lower
+    temperature. Nothing about the model changed; only how greedily it is served. It is in the
+    set because serving greedily is what a team actually does, and because it is the policy that
+    makes this log unusable: its importance weights reach four figures and the effective sample
+    size falls below the floor, so the tool refuses rather than estimating.
+    """
     return {
         "incumbent": IncumbentPolicy(world, logging_policy, temperature),
         "incumbent_clone": BlendPolicy(
@@ -204,5 +216,8 @@ def build_baseline_policies(
         "popularity": PopularityPolicy(click_counts, temperature),
         "uniform": UniformPolicy(temperature),
         "contrarian_lift": ContrarianPolicy(world, logging_policy, temperature),
+        "contrarian_sharp": ContrarianPolicy(
+            world, logging_policy, sharp_temperature, name="contrarian_sharp"
+        ),
         "oracle": OraclePolicy(world, temperature),
     }
