@@ -5,7 +5,7 @@
 PYTHON ?= python3
 PACKAGE := replay_gap
 
-.PHONY: help install lint format test fixtures experiments receipts prove-receipts verify evidence clean
+.PHONY: help install lint format test fixtures experiments receipts prove-receipts verify evidence set-handle clean
 
 help:
 	@echo "install      install the package and its development extras"
@@ -17,6 +17,7 @@ help:
 	@echo "prove-receipts  corrupt the README five ways and watch the checker fail each one"
 	@echo "verify       lint + test + receipts. This is the command the README promises."
 	@echo "evidence     regenerate the diagram, screenshots and demo replay (needs extras)"
+	@echo "set-handle   replace the testhandle placeholder: make set-handle HANDLE=you"
 
 install:
 	$(PYTHON) -m pip install -e ".[dev]"
@@ -60,6 +61,15 @@ evidence:
 	$(PYTHON) tools/render_diagrams.py
 	$(PYTHON) tools/capture_screenshots.py
 	$(PYTHON) tools/record_demo.py
+
+# The repository ships with testhandle as a placeholder, because the author's handle is not
+# something this repository should guess. One command replaces it everywhere, including in the
+# badge URLs, where a wrong name renders as "unknown" and is the first thing a reviewer notices.
+set-handle:
+	@test -n "$(HANDLE)" || { echo 'usage: make set-handle HANDLE=<your-github-username>'; exit 1; }
+	@git grep -l testhandle | xargs sed -i 's/testhandle/$(HANDLE)/g'
+	@echo "set the GitHub handle to $(HANDLE) in:"
+	@git grep -l "$(HANDLE)/replay-gap" || true
 
 clean:
 	rm -rf reports .pytest_cache .ruff_cache .coverage coverage.xml

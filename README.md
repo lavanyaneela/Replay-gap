@@ -1,5 +1,10 @@
 # replay-gap
 
+[![verify](https://github.com/GITHUB_USERNAME/replay-gap/actions/workflows/ci.yml/badge.svg)](https://github.com/GITHUB_USERNAME/replay-gap/actions/workflows/ci.yml)
+[![python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](pyproject.toml)
+[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![offline](https://img.shields.io/badge/make%20verify-offline-informational)](Makefile)
+
 **Offline ranker evaluation that reports when it cannot answer.** The log was produced by the
 ranker that is already deployed, so replaying a candidate against it cannot separate a genuinely
 better model from one that merely agrees with production more often. This measures that gap
@@ -50,7 +55,7 @@ so a stale number fails the build rather than sitting here looking plausible.
 Prerequisites: Python 3.11 or later. Nothing else. No Docker, no API key, no network.
 
 ```bash
-git clone https://github.com/lavanyaneela/replay-gap.git
+git clone https://github.com/GITHUB_USERNAME/replay-gap.git
 cd replay-gap
 python -m pip install -e ".[dev]"
 
