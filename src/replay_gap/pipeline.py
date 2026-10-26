@@ -72,11 +72,8 @@ class PolicyResult:
 def _decide(overlap: OverlapReport, interval: BootstrapInterval) -> tuple[str, int, str]:
     """Turn the diagnostics and the corrected interval into one of the documented exit codes."""
     if not overlap.usable:
-        return (
-            "refused",
-            EXIT_REFUSED,
-            f"{overlap.reason}. Run an online experiment instead of estimating from this log.",
-        )
+        refusal = overlap.refusal()
+        return "refused", EXIT_REFUSED, f"{overlap.reason}. Remedy: {refusal.remedy}."
     if not np.isfinite(interval.low) or not np.isfinite(interval.high):
         return (
             "refused",
@@ -100,6 +97,20 @@ def _decide(overlap: OverlapReport, interval: BootstrapInterval) -> tuple[str, i
         EXIT_NOT_POSITIVE,
         f"corrected lift of {interval.point:+.2%} is not distinguishable from zero",
     )
+
+
+def compare_exit_code(results: list[PolicyResult]) -> int:
+    """The exit code for a whole comparison, in priority order.
+
+    A refusal anywhere outranks a win anywhere. A caller running this in a pipeline needs to
+    know that some question went unanswered even when a different policy did win, because the
+    unanswered one is the one somebody will otherwise ship on the strength of a naive replay.
+    """
+    if any(result.decision == "refused" for result in results):
+        return EXIT_REFUSED
+    if any(result.decision == "positive" for result in results):
+        return EXIT_POSITIVE
+    return EXIT_NOT_POSITIVE
 
 
 def evaluate_policy(

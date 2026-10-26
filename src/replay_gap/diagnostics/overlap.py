@@ -18,6 +18,7 @@ from dataclasses import asdict, dataclass
 import numpy as np
 
 from replay_gap.diagnostics.ess import effective_sample_size, ess_fraction
+from replay_gap.errors import RefusalError
 from replay_gap.evaluation import PolicyTrace
 from replay_gap.simulator.generate import InteractionLog
 
@@ -39,6 +40,26 @@ class OverlapReport:
 
     def as_dict(self) -> dict:
         return asdict(self)
+
+    def refusal(self) -> RefusalError:
+        """This report as the exception a library caller would rather have than an exit code.
+
+        The CLI turns a refusal into exit code 2, but a caller embedding this package in a
+        pipeline wants it to stop. Keeping one object that can be either means the message and
+        the remedy are written once instead of drifting between the two paths.
+        """
+        return RefusalError(
+            f"cannot estimate the value of {self.policy} from this log: {self.reason}",
+            remedy=(
+                "run an online experiment, or collect a log under a policy that explores the "
+                "actions this candidate wants to take"
+            ),
+        )
+
+    def require_usable(self) -> None:
+        """Raise the refusal if overlap is insufficient, otherwise do nothing."""
+        if not self.usable:
+            raise self.refusal()
 
 
 def assess_overlap(

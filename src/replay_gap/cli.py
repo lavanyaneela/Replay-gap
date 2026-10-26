@@ -34,10 +34,10 @@ from replay_gap.fixtures import (
 from replay_gap.pipeline import (
     EXIT_NOT_POSITIVE,
     EXIT_POSITIVE,
-    EXIT_REFUSED,
     EXIT_TOOL_ERROR,
     EvaluationRun,
     build_policies,
+    compare_exit_code,
     run_evaluation,
 )
 from replay_gap.report import render_gap_table, render_html, render_json, render_policy_detail
@@ -206,10 +206,7 @@ def command_compare(args: argparse.Namespace) -> int:
     refused = [r.policy for r in run.results if r.decision == "refused"]
     if refused:
         print(f"refused for {len(refused)} policy(ies): {', '.join(refused)}")
-        return EXIT_REFUSED
-    if any(r.decision == "positive" for r in run.results):
-        return EXIT_POSITIVE
-    return EXIT_NOT_POSITIVE
+    return compare_exit_code(run.results)
 
 
 COMMANDS = {
