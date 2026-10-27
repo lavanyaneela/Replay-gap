@@ -38,6 +38,15 @@ blocks are not examples: they are captured output, they carry the headline and t
 stripping them meant the first screen of the document was the one part nothing checked. Falsified
 figures in both passed. So the row check below reads the raw document rather than the stripped
 one, and those blocks are guarded line by line as exact strings.
+
+A second audit then found that this closed mutation and left insertion open. Guarding the known
+lines proves those lines are current; it says nothing about a line that was never guarded. A
+fabricated "precision at 5  99.4%" inserted into the headline block passed the build, which is
+the overclaim this whole mechanism exists to prevent, sitting on the first screen under a green
+check. So :func:`excluded_region_check` sweeps the numerals inside everything ``strip_code``
+removes and requires each one to belong to a guarded row or a measured value. That is the
+inverse rule: the forward check asks whether every measurement is claimed correctly, and this
+asks whether every claim is measured.
 """
 
 from __future__ import annotations
@@ -56,6 +65,10 @@ from metrics_spec import SPEC  # noqa: E402
 METRICS_PATH = Path("docs/metrics.json")
 
 FENCE = re.compile(r"```.*?```", re.DOTALL)
+# A fence with a language tag is source: a command line, a SQL statement, a Python snippet.
+# A fence with no tag is how captured terminal output is written in this repository, so that is
+# where a fabricated figure would hide and that is what gets swept.
+OUTPUT_FENCE = re.compile(r"```[ \t]*\n(.*?)```", re.DOTALL)
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 HTML_TAG = re.compile(r"<[^>]+>")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
@@ -86,7 +99,6 @@ ALLOWED_BARE = {
     "11",
     "12",
     "20",
-    "100",
     "200",
     "720",
     "30,240",  # ten candidates over five positions, the slate length ADR-002 rejects
@@ -94,15 +106,12 @@ ALLOWED_BARE = {
     "3.11",
     "3.12",
     "3.13",
-    "0.25",
-    "1.0",
-    "95",
-    "80",
-    "0.05",
 }
 
-# 50,000 and 5,000 are deliberately absent: the log size and the context count are measured
-# values, so they are guarded by the sweep like any other figure.
+# Deliberately absent, because each is a measured value guarded by the sweep like any other:
+# the log size, the context count, the significance level, the power, the coverage percentage
+# and the overlap floor. An exemption covering one of those is what the assertion below exists
+# to catch, and it has caught several.
 
 
 AMBIGUOUS_DIGITS = 3
@@ -128,12 +137,22 @@ def assert_no_exemption_hides_a_metric(payload: dict) -> list[Finding]:
     required to be anchored by phrase instead. The collision that matters is a specific value
     such as 50,000 sitting in the exemption list, where the sweep could have guarded it and the
     exemption is what stopped it.
+
+    The comparison covers the bare digits as well as the rendered string, because that is what
+    the reverse check actually exempts on. An earlier version compared only the rendered string,
+    so a metric rendering as 95% was invisible to the assertion while 95 sat in the list.
     """
     collisions = sorted(
         key
         for key, value in payload["formatted"].items()
         if not is_ambiguous(value)
-        and (value in ALLOWED_BARE or value.lstrip("+-").replace(",", "") in ALLOWED_BARE)
+        and {
+            value,
+            value.rstrip("%"),
+            value.lstrip("+-").replace(",", ""),
+            value.lstrip("+-").rstrip("%").replace(",", ""),
+        }
+        & ALLOWED_BARE
     )
     return [
         Finding(
@@ -143,6 +162,30 @@ def assert_no_exemption_hides_a_metric(payload: dict) -> list[Finding]:
             "reverse check would never see it go stale",
         )
         for key in collisions
+    ]
+
+
+def assert_no_anchor_is_shared(payload: dict) -> list[Finding]:
+    """Two metrics must not render the same anchor phrase.
+
+    When they do, one metric's claim can be deleted outright and the other's sentence satisfies
+    the check on its behalf, which is exactly the property the per document rule was added to
+    create. An audit found this between the two figures that both render 1.62%, and deleting
+    the sweep claim from the README passed.
+    """
+    shared: dict[str, list[str]] = {}
+    for key, anchors in payload["anchors"].items():
+        for anchor in anchors:
+            shared.setdefault(normalise(anchor), []).append(key)
+    return [
+        Finding(
+            "metrics_spec.py",
+            "shared anchor",
+            f"{anchor!r} is the anchor of {' and '.join(keys)}, so either claim satisfies the "
+            "check for both and one of them can be deleted unnoticed",
+        )
+        for anchor, keys in sorted(shared.items())
+        if len(keys) > 1
     ]
 
 
@@ -191,6 +234,24 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
     checked = 0
     quoted = 0
     tokens = {name: number_tokens(text) for name, text in documents.items()}
+
+    def anchored_elsewhere_with_same_value(document: str, value: str, exclude: str) -> bool:
+        """True when another metric rendering the same figure is anchored in this document.
+
+        Two measurements can legitimately be the same number. When one of them is anchored in
+        the document, the document is making a current, correctly worded claim about that
+        figure, and failing the other is noise rather than a finding.
+        """
+        for other in SPEC.metrics:
+            if other.key == exclude or other.key not in payload["metrics"]:
+                continue
+            if other.format(payload["metrics"][other.key]) != value:
+                continue
+            phrases = [normalise(phrase.format(value)) for phrase in other.anchors]
+            if any(phrase in document for phrase in phrases):
+                return True
+        return False
+
     for metric in SPEC.metrics:
         if not metric.checked:
             continue
@@ -244,7 +305,9 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
             if value not in tokens[name]:
                 continue
             quoted += 1
-            if not any(anchor in text for anchor in anchors):
+            if not any(anchor in text for anchor in anchors) and not (
+                anchored_elsewhere_with_same_value(text, value, key)
+            ):
                 findings.append(
                     Finding(
                         name,
@@ -282,6 +345,58 @@ def row_check(payload: dict, documents: dict[str, str]) -> tuple[list[Finding], 
             )
         )
     return findings, found
+
+
+def excluded_regions(text: str) -> str:
+    """The parts a reader reads as results: untagged fences and inline code spans.
+
+    A fence carrying a language tag is source code, and the numbers in a SQL statement or a
+    Python snippet are syntax rather than claims. An untagged fence is captured output, which
+    is where a fabricated figure would sit and be believed.
+
+    Link targets, image URLs and HTML attributes are left out as well, because a width
+    attribute is not a claim and sweeping one trains the reader to ignore the section.
+    """
+    regions = [match.group(1) for match in OUTPUT_FENCE.finditer(text)]
+    for match in INLINE_CODE.finditer(text):
+        span = match.group(0)
+        # Inside a span, only a percentage reads as a result. A bare number there is an
+        # argument or part of an identifier: PERCENTILE_CONT(0.5) is SQL, not a claim.
+        if "%" in span:
+            regions.append(span)
+    return normalise(" ".join(regions))
+
+
+def excluded_region_check(payload: dict, raw_documents: dict[str, Path | str]) -> list[Finding]:
+    """Numerals inside fences and code spans must belong to a guarded row or a measurement.
+
+    The row check proves the guarded lines are current. This proves nothing else was added
+    beside them, which is the other half and the one an audit found missing.
+    """
+    known = set(payload["formatted"].values())
+    known |= {value.replace(",", "") for value in known}
+    known |= {value.lstrip("+") for value in known}
+    for rendered in payload.get("rows", {}).values():
+        known |= number_tokens(rendered)
+
+    findings: list[Finding] = []
+    for name, text in raw_documents.items():
+        for match in NUMBER.finditer(excluded_regions(str(text))):
+            digits, percent = match.group(1), match.group(2)
+            token = f"{digits}{percent}"
+            if token in known or digits in known or digits in ALLOWED_BARE:
+                continue
+            if not percent and "." not in digits and len(digits.replace(",", "")) <= 2:
+                continue  # a small bare integer inside a command line is an argument
+            findings.append(
+                Finding(
+                    name,
+                    "fabricated",
+                    f"{token} sits inside a code block or span and matches no measured figure "
+                    "and no guarded line",
+                )
+            )
+    return findings
 
 
 def reverse_check(payload: dict, documents: dict[str, str]) -> list[Finding]:
@@ -342,10 +457,12 @@ def main(argv: list[str] | None = None) -> int:
     documents, raw_documents = load_documents(payload["checked_documents"])
 
     stale = assert_no_exemption_hides_a_metric(payload)
+    stale.extend(assert_no_anchor_is_shared(payload))
     forward_findings, checked, quoted = forward_check(payload, documents)
     stale.extend(forward_findings)
     row_findings, rows_found = row_check(payload, raw_documents)
     stale.extend(row_findings)
+    stale.extend(excluded_region_check(payload, raw_documents))
     unguarded = reverse_check(payload, documents)
 
     print(

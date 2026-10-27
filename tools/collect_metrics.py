@@ -100,6 +100,19 @@ def read_evaluation_metrics() -> dict:
         fixture.log.clicks[:, 0].mean()
     )
     payload["units_error_lift"] = first_slot_value / run.logged_mean_reward - 1.0
+
+    # The configured thresholds are published in the documents too, so they are measured here
+    # rather than exempted from the sweep by hand. An exemption that covers a figure a document
+    # quotes is an exemption that lets it go stale.
+    payload["thresholds"] = {
+        "min_ess_fraction": config.diagnostics.min_ess_fraction,
+        "max_weight_share": config.diagnostics.max_weight_share,
+        "alpha": config.diagnostics.alpha,
+        "power": config.diagnostics.power,
+        "clip_weight": config.estimators.clip_weight,
+        "bootstrap_resamples": config.estimators.bootstrap_resamples,
+        "sharp_temperature": config.policies.sharp_temperature,
+    }
     return payload
 
 

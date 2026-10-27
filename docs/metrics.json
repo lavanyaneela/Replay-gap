@@ -18,6 +18,9 @@
     "units_error_lift": -0.38021959526202853,
     "sharp_match_rate": 0.08684,
     "sharp_naive_lift": 0.19640559699768634,
+    "min_ess_fraction": 0.02,
+    "alpha": 0.05,
+    "power": 0.8,
     "e1_scenarios": 180,
     "e1_decisive": 166,
     "e1_naive_sign_disagreement_rate": 0.2710843373493976,
@@ -67,6 +70,9 @@
     "units_error_lift": "-38.02%",
     "sharp_match_rate": "8.7%",
     "sharp_naive_lift": "+19.64%",
+    "min_ess_fraction": "2.00%",
+    "alpha": "0.05",
+    "power": "80%",
     "e1_scenarios": "180",
     "e1_decisive": "166",
     "e1_naive_sign_disagreement_rate": "27.1%",
@@ -174,6 +180,19 @@
       "replay lift +19.64%",
       "replay reports +19.64%"
     ],
+    "min_ess_fraction": [
+      "below the 2.00% floor",
+      "2.00% floor",
+      "2.00% overlap floor"
+    ],
+    "alpha": [
+      "alpha 0.05",
+      "alpha of 0.05"
+    ],
+    "power": [
+      "80% power",
+      "power 80%"
+    ],
     "e1_scenarios": [
       "180 candidate rankers",
       "180 sampled rankers"
@@ -220,10 +239,8 @@
       "6 times smaller"
     ],
     "e2_end_ess_fraction_sharpened": [
-      "ends at 1.62%",
-      "down to 1.62%",
-      "which is 1.62% of the log",
-      "sample size is 1.62%"
+      "sweep ends at 1.62%",
+      "sharpened to 1.62%"
     ],
     "e2_naive_lift_at_end": [
       "still reports +18.20%",
@@ -325,6 +342,8 @@
     "cli_sharp_ess": "effective sample size   810 of 50,000 (1.62%)",
     "cli_incumbent_snips": "corrected lift (SNIPS)  +0.00%   95% interval [+0.00%, +0.00%]",
     "cli_sharp_snips": "corrected lift (SNIPS)  +25.97%   95% interval [+20.40%, +30.93%]",
+    "cli_incumbent_weights": "largest single weight   0.002% of the total mass weights hitting the cap 0.000% of sessions",
+    "cli_sharp_reason": "effective sample size is 1.62% of the log, below the 2.00% floor.",
     "cli_logged_mean_reward": "logged mean reward      1.07396"
   },
   "descriptions": {
@@ -346,6 +365,9 @@
     "units_error_lift": "what the units error in the war story reported for the deployed ranker",
     "sharp_match_rate": "share of the log a replay keeps for the greedily served ranker",
     "sharp_naive_lift": "what a replay reports for the greedily served ranker",
+    "min_ess_fraction": "the overlap floor below which the tool refuses",
+    "alpha": "the two sided significance level the intervals use",
+    "power": "the power the minimum detectable lift is computed at",
     "e1_scenarios": "candidate rankers sampled in E1",
     "e1_decisive": "E1 scenarios whose true lift is large enough to act on",
     "e1_naive_sign_disagreement_rate": "how often naive replay disagrees with the referee about the sign",
@@ -403,6 +425,8 @@
     "cli_sharp_ess": "README CLI block for contrarian_sharp: the effective sample size line",
     "cli_incumbent_snips": "README CLI block for the incumbent: the corrected estimate line",
     "cli_sharp_snips": "README CLI block for the refused policy: the corrected estimate line",
+    "cli_incumbent_weights": "README CLI block for the incumbent: the weight diagnostics lines",
+    "cli_sharp_reason": "README CLI block for the refused policy: the refusal reason",
     "cli_logged_mean_reward": "README CLI block: the logged mean reward line"
   },
   "checked_documents": [

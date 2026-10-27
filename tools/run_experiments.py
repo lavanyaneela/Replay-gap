@@ -37,9 +37,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--quiet", action="store_true", help="write the JSON without printing the tables"
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="import every experiment and exit, without running one",
+    )
     args = parser.parse_args(argv)
 
     selected = tuple(args.only) if args.only else EXPERIMENTS
+
+    if args.dry_run:
+        # Import every experiment and stop. This exists because the regression test for the
+        # import path has to reach an import, and --help does not: argparse prints and exits
+        # before the loop below. A test that runs --help passes against the broken version,
+        # which is a green check certifying a property it never looked at.
+        for name in selected:
+            module = importlib.import_module(f"experiments.{name}")
+            print(f"{name}: imported from {module.__file__}")
+        print(f"{len(selected)} experiment(s) importable")
+        return 0
+
     started = time.perf_counter()
     for name in selected:
         module = importlib.import_module(f"experiments.{name}")

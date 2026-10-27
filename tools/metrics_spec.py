@@ -253,6 +253,32 @@ METRICS: tuple[Metric, ...] = (
         unit="signed_percent",
         anchors=("replay lift {}", "replay reports {}"),
     ),
+    Metric(
+        key="min_ess_fraction",
+        source="evaluation",
+        path=("thresholds", "min_ess_fraction"),
+        description="the overlap floor below which the tool refuses",
+        unit="percent",
+        anchors=("below the {} floor", "{} floor", "{} overlap floor"),
+    ),
+    Metric(
+        key="alpha",
+        source="evaluation",
+        path=("thresholds", "alpha"),
+        description="the two sided significance level the intervals use",
+        unit="ratio",
+        digits=2,
+        anchors=("alpha {}", "alpha of {}"),
+    ),
+    Metric(
+        key="power",
+        source="evaluation",
+        path=("thresholds", "power"),
+        description="the power the minimum detectable lift is computed at",
+        unit="percent",
+        digits=0,
+        anchors=("{} power", "power {}"),
+    ),
     # E1.
     Metric(
         key="e1_scenarios",
@@ -352,7 +378,7 @@ METRICS: tuple[Metric, ...] = (
         path=("end_ess_fraction_sharpened",),
         description="what the log is worth once serving is sharpened too",
         unit="percent",
-        anchors=("ends at {}", "down to {}", "which is {} of the log", "sample size is {}"),
+        anchors=("sweep ends at {}", "sharpened to {}"),
     ),
     Metric(
         key="e2_naive_lift_at_end",
@@ -680,6 +706,28 @@ ROWS: tuple[Row, ...] = (
             ("lift", ("contrarian_sharp", "lifts", "snips"), "signed_percent", 2),
             ("low", ("contrarian_sharp", "intervals", "snips", "0"), "signed_percent", 2),
             ("high", ("contrarian_sharp", "intervals", "snips", "1"), "signed_percent", 2),
+        ),
+    ),
+    Row(
+        key="cli_incumbent_weights",
+        source="evaluation",
+        description="README CLI block for the incumbent: the weight diagnostics lines",
+        template=(
+            "largest single weight   {} of the total mass weights hitting the cap {} of sessions"
+        ),
+        cells=(
+            ("share", ("incumbent", "overlap", "max_weight_share"), "percent", 3),
+            ("clipped", ("incumbent", "clipped_share"), "percent", 3),
+        ),
+    ),
+    Row(
+        key="cli_sharp_reason",
+        source="evaluation",
+        description="README CLI block for the refused policy: the refusal reason",
+        template="effective sample size is {} of the log, below the {} floor.",
+        cells=(
+            ("fraction", ("contrarian_sharp", "overlap", "ess_fraction"), "percent", 2),
+            ("floor", ("thresholds", "min_ess_fraction"), "percent", 2),
         ),
     ),
     Row(

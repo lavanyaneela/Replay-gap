@@ -48,13 +48,19 @@ structurally unanswerable:
 372 tests at 100% line coverage, one seed, offline after install. 371 of them run anywhere; the
 one that does not is the PostgreSQL parity test that needs a live server, and the rest of that
 module checks the dialect contract without one.
-Every figure in this document is re-measured by CI and checked against the sentence around it,
-so a stale number fails the build rather than sitting here looking plausible.
+Every numeral in this document is re-measured by CI and checked against the sentence around it,
+so a stale number fails the build rather than sitting here looking plausible, and a number
+nothing measures fails it too.
 
 ## Quickstart
 
 Prerequisites: Python 3.11 or later. Nothing else: no Docker, no API key, no credentials. The
 install needs a package index; everything after it runs offline.
+
+The clone URL below names `GITHUB_USERNAME`, which is a placeholder: this repository does not
+know the author's GitHub account, and a badge URL naming an account that does not exist renders
+as "unknown". Run `make set-handle HANDLE=<your-account>` once after forking to fill it in and
+add the CI badge.
 
 ```bash
 git clone https://github.com/GITHUB_USERNAME/replay-gap.git
@@ -197,7 +203,10 @@ reason                  effective sample size is 1.62% of the log, below the 2.0
 
 `contrarian_sharp` is the same ranker as `contrarian_lift`. Nothing about the model changed; it
 is served greedily instead of stochastically, so a replay reports +19.64% for it, exactly what
-it reports for the stochastic version. The fifty thousand session log is worth 810
+it reports for the stochastic version. Overlap is what changed, and below the 2.00% floor the
+tool declines rather than estimating. That floor is a configuration value, not a constant in
+the code, because it is calibrated against this world's weight distribution and ADR-005 says
+plainly that it is the one claim here that does not transfer. The fifty thousand session log is worth 810
 sessions for that question.
 
 Had the tool answered, SNIPS would have reported +25.97% where the true lift is +21.53%, and
@@ -482,14 +491,18 @@ happily while the sentence around them has gone stale: "45 disagreements" is sti
 document that now says "45 scenarios". So each metric carries anchor phrases, the number
 together with two or three words of its context, and any one of them matching is enough, because
 the same figure reads differently in a table and in a sentence. A reverse check sweeps every
-number in the prose and fails on any that no measurement accounts for, which is the half that
-catches a figure edited to a different figure: the old value simply stops appearing, so a check
-that only looks for quotations of the current value has nothing to complain about.
+number and fails on any that no measurement accounts for, which is the half that catches a
+figure edited to a different figure: the old value simply stops appearing, so a check that only
+looks for quotations of the current value has nothing to complain about. The same sweep runs
+inside the blocks of captured output, because guarding the lines that are there proves those
+lines are current and says nothing about a fabricated line sitting beside them.
 
-The guarantee covers numerals. A figure spelled out in words ("sixteen points", "a factor of
-six") is not seen by either check, so this document pairs a spelled figure with its digits
-wherever the figure is load bearing, and the spelled form is a reading aid rather than the
-claim.
+The guarantee covers numerals, in prose, in tables, inside blocks of captured output and inside
+any inline span carrying a percentage. A figure spelled out in words ("sixteen points", "a
+factor of six") is not seen by either check, so this document pairs a spelled figure with its
+digits wherever the figure is load bearing, and the spelled form is a reading aid rather than
+the claim. A fence carrying a language tag is source rather than a result and is not swept: the
+numbers in a SQL statement or a command line are syntax.
 
 ## Tech stack
 

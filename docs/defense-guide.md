@@ -198,13 +198,20 @@ matches phrases rather than digits, because searching for digits passes while th
 around them goes stale, and a reverse check fails on any number in the prose that no measurement
 accounts for.
 
-**If pushed on "who checks the checker":** an audit did, and found two holes. The anchor rule
+**If pushed on "who checks the checker":** two audits did, and between them found four holes. The anchor rule
 required a phrase to appear somewhere in the checked set rather than in the document making the
 claim, so a README whose every framing sentence had gone stale passed because the defense guide
 still carried the wording. And fenced blocks were stripped before checking, which left the two
 blocks of captured output on the README's first screen as the only unguarded numbers in the
-document. Both are fixed, both now have a case in the transcript, and a test asserts that every
-case in the transcript is a failure.
+document. Then a second pass found that the fix closed
+mutation and left insertion open: guarding the lines that are there proves those lines are
+current and says nothing about a fabricated line beside them, so a fabricated metric line inserted into
+the headline block passed the build. And two metrics had been given the same anchor
+phrase, so deleting one claim outright left the other satisfying the check on its behalf.
+
+All four are fixed, each has a case in the transcript, and a test asserts that every case in
+the transcript is a failure. The honest summary is that the mechanism was wrong twice in ways
+I did not find myself, which is the argument for having something adversarial read it.
 
 ## Things to say, and things not to say
 
