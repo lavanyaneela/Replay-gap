@@ -162,9 +162,40 @@ def test_the_committed_receipts_proof_shows_the_checker_failing_every_corruption
         assert code == "exit 1", f"{case} is published as {code}, so the checker did not catch it"
 
 
+def test_no_absolute_duration_is_published_as_a_claim():
+    """The README promises this of the whole repository, so a machine has to enforce it."""
+    result = run(str(TOOLS / "check_durations.py"))
+    assert result.returncode == 0, result.stdout
+
+
+def test_the_duration_check_fails_on_a_duration_in_a_source_docstring(tmp_path):
+    """An audit put a fabricated millisecond figure in a docstring and everything passed."""
+    sys.path.insert(0, str(TOOLS))
+    try:
+        from check_durations import scan
+    finally:
+        sys.path.pop(0)
+    # The offending text is assembled from parts so that this file does not itself contain a
+    # published duration. The check scans every tracked file, including this one, and a test
+    # fixture that trips the rule it is testing is a false positive nobody will thank you for.
+    value, unit = 48, "ms"
+    offender = tmp_path / "module.py"
+    offender.write_text(f'"""The slow path took {value} {unit} here."""\n', encoding="utf-8")
+    findings = scan([offender])
+    assert findings, "a published millisecond must not pass"
+    assert findings[0][2] == f"{value} {unit}"
+
+
 @pytest.mark.parametrize(
     "script",
-    ["run_experiments.py", "collect_metrics.py", "check_numbers.py", "metrics_spec.py"],
+    [
+        "run_experiments.py",
+        "collect_metrics.py",
+        "check_numbers.py",
+        "check_durations.py",
+        "check_rendering.py",
+        "metrics_spec.py",
+    ],
 )
 def test_every_tool_script_compiles(script):
     result = run("-m", "py_compile", str(TOOLS / script))

@@ -140,6 +140,8 @@ part I do not depend on real. ADR-001 is that argument in full.
 
 ### "What is the weakest part?"
 
+Two answers, and the second one is about me rather than about the tool.
+
 The propensities are exact here, and in production they almost never are. That is the single
 assumption everything rests on.
 
@@ -154,6 +156,14 @@ use to decide whether to trust an estimate climbs while the estimate decays.
 There is no fix inside this design. Detecting it needs an external signal, such as a holdout
 with randomised serving, which this repository does not have and cannot simulate honestly. It is
 the first item under future work for that reason.
+
+The second weakest part is the verification discipline, and I would rather say it than have it
+found. Three separate times a fix landed in the code and the edit describing it silently failed
+to apply, and twice I reported something fixed without checking the artifact. The regression
+test that passed against its own bug is the same error one layer down. What I take from it is
+that the receipts mechanism is not decoration: this repository publishes a number nobody can
+quietly change precisely because I am demonstrably capable of believing a change happened when
+it did not.
 
 The second weakest part is that retrieval is uniform and unbiased, which is the one confounder
 in a real system I deliberately removed. In production the retrieval stage is itself trained on
@@ -198,8 +208,8 @@ matches phrases rather than digits, because searching for digits passes while th
 around them goes stale, and a reverse check fails on any number in the prose that no measurement
 accounts for.
 
-**If pushed on "who checks the checker":** three audits did, and between them found six holes,
-which is the honest headline about this mechanism. The anchor rule
+**If pushed on "who checks the checker":** three audits did, and between them found seven
+holes, which is the honest headline about this mechanism. The anchor rule
 required a phrase to appear somewhere in the checked set rather than in the document making the
 claim, so a README whose every framing sentence had gone stale passed because the defense guide
 still carried the wording. And fenced blocks were stripped before checking, which left the two
@@ -217,8 +227,16 @@ which still allowed a sentence inverting the central finding, quoting the right 
 a hundred lines from the sentence stating it correctly. The rule is now per occurrence: every
 place a figure is written has to sit inside one of its anchor phrases or inside a guarded line.
 
-All six are fixed, each has a case in the transcript, which now runs ten corruptions, and a
-test asserts that every case in it is a failure. The honest summary is that this mechanism was
+The seventh was not in the receipts at all. `make experiments` had been broken since it was
+written, the suite was at full line coverage and could not see it because nothing under `src/`
+imports the runner, and the test I added to catch it ran the runner with `--help`, which
+argparse answers before reaching any import. So the regression test passed against the
+regression. That is this repository's own thesis happening to the repository, and I only found
+out because somebody checked whether the check checked anything.
+
+All seven are fixed, each of the receipts ones has a case in the transcript, which now runs ten
+corruptions, and a test asserts that every case in it is a failure. The runner one is covered
+by a test that reconstructs the broken runner and asserts the new check fails against it. The honest summary is that this mechanism was
 wrong six times in ways I did not find myself. That is the argument for having something
 adversarial read your work, and it is also why the transcript is committed rather than
 described.

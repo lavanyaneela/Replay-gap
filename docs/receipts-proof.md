@@ -25,8 +25,8 @@ exit 1
 
 === 3. Digits untouched, every sentence that framed them rewritten ===
 exit 1
-  STALE     README.md: stale: incumbent_naive_lift is written as +5.53% outside any of its anchor phrases, in ...laying the deployed ranker against its own log says it is **+5.53% uplift versus itself.** ## Four questions this answers that... (anchors: +5.53% better than itself | log reports +5.53% | replay lift +5.53%)
-  STALE     README.md: stale: incumbent_naive_lift is written as +5.53% outside any of its anchor phrases, in ...- **Replaying the deployed ranker against its own log shows +5.53%.** Its true lift over itself is zero, because it is itself.... (anchors: +5.53% better than itself | log reports +5.53% | replay lift +5.53%)
+  STALE     README.md: stale: incumbent_naive_lift is written as +5.53% in a paragraph that does not claim it: ...laying the deployed ranker against its own log says it is **+5.53% uplift versus itself.**... (anchors: +5.53% better than itself | log reports +5.53% | replay lift +5.53%)
+  STALE     README.md: stale: incumbent_naive_lift is written as +5.53% in a paragraph that does not claim it: ...- **Replaying the deployed ranker against its own log shows +5.53%.** Its true lift over itself is zero, because it is itself.... (anchors: +5.53% better than itself | log reports +5.53% | replay lift +5.53%)
 2 stale figure(s). A document quotes a number the code no longer
 
 === 4. One cell edited inside a guarded table row ===
@@ -45,7 +45,8 @@ exit 1
 === 6. A number added that nothing measures ===
 exit 1
   UNGUARDED README.md: unguarded: 61.4% matches no measured figure
-1 unguarded number(s) and --strict-reverse is set.
+  UNGUARDED README.md: unguarded: 61.4% matches no measured figure
+2 unguarded number(s) and --strict-reverse is set.
 
 === 7. A fabricated line inserted into the block of captured output ===
 exit 1
@@ -59,7 +60,7 @@ exit 1
 
 === 9. A false sentence placed beside a true one, both quoting the figure ===
 exit 1
-  STALE     README.md: stale: sharp_ess_fraction is written as 1.62% outside any of its anchor phrases (anchors: sample size is 1.62% | which is 1.62% of the log | is 1.62% and the tool | sweep ends at 1.62%)
+  STALE     README.md: stale: sharp_ess_fraction is written as 1.62% in a paragraph that does not claim it: ...overlap stays comfortable throughout, never dropping under 1.62% of the log.... (anchors: sample size is 1.62% | which is 1.62% of the log | is 1.62% and the tool | sweep ends at 1.62%)
 1 stale figure(s). A document quotes a number the code no longer
 
 === 10. A false claim inside a fence carrying no percent sign ===

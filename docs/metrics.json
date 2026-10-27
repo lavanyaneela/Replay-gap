@@ -1,7 +1,7 @@
 {
   "metrics": {
-    "tests_total": 373,
-    "tests_executed": 372,
+    "tests_total": 377,
+    "tests_executed": 376,
     "coverage_line_pct": 1.0,
     "incumbent_naive_lift": 0.05525198631872463,
     "incumbent_naive_matched": 17187,
@@ -51,8 +51,8 @@
     "e5_crossed": 3
   },
   "formatted": {
-    "tests_total": "373",
-    "tests_executed": "372",
+    "tests_total": "377",
+    "tests_executed": "376",
     "coverage_line_pct": "100%",
     "incumbent_naive_lift": "+5.53%",
     "incumbent_naive_matched": "17,187",
@@ -103,11 +103,11 @@
   },
   "anchors": {
     "tests_total": [
-      "373 tests"
+      "377 tests"
     ],
     "tests_executed": [
-      "372 of them run",
-      "372 tests run"
+      "376 of them run",
+      "376 tests run"
     ],
     "coverage_line_pct": [
       "100% line coverage",

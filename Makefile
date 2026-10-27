@@ -14,6 +14,7 @@ help:
 	@echo "fixtures     regenerate the committed interaction log from its seed"
 	@echo "experiments  run E1 to E5 and write docs/experiments/*.json"
 	@echo "receipts     re-measure every published number and check it against the prose"
+	@echo "             and fail on any absolute duration published as a claim"
 	@echo "prove-receipts  corrupt the README five ways and watch the checker fail each one"
 	@echo "verify       lint + test + receipts. This is the command the README promises."
 	@echo "evidence     regenerate the diagram, screenshots and demo replay (needs extras)"
@@ -52,6 +53,7 @@ reports/coverage.json reports/junit.xml:
 receipts: reports/coverage.json
 	$(PYTHON) tools/collect_metrics.py --skip-tests
 	$(PYTHON) tools/check_numbers.py --strict-reverse
+	$(PYTHON) tools/check_durations.py
 
 prove-receipts:
 	bash tools/prove_receipts.sh

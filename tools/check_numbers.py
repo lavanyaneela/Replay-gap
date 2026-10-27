@@ -238,6 +238,16 @@ def number_tokens(text: str) -> set[str]:
     return tokens
 
 
+def split_paragraphs(text: str) -> list[str]:
+    """The document as normalised paragraphs, which is the unit the anchor rule works in.
+
+    A markdown table, a fenced block and a list are each one paragraph here, because a blank
+    line is what separates them from the prose around them, and that is the same boundary a
+    reader perceives.
+    """
+    return [normalise(block) for block in re.split(r"\n\s*\n", text) if block.strip()]
+
+
 def covered_spans(text: str, phrases: list[str]) -> list[tuple[int, int]]:
     """Character ranges of the text covered by any of these phrases."""
     spans: list[tuple[int, int]] = []
@@ -281,17 +291,23 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
     comfortable throughout, never dropping under 1.62%" and the build stayed green, because the
     correct sentence about the same figure was a hundred lines further down.
 
-    So each occurrence has to be inside an anchor of its own, or inside a guarded row, which is
-    how a table cell and a line of captured output earn their place without words around them.
+    So each occurrence has to be inside an anchor of its own, inside a guarded row, which is how
+    a table cell and a line of captured output earn their place without words around them, or in
+    a paragraph where the claim is already made properly.
+
+    That last exemption is the one that keeps this rule usable. Without it a back reference, a
+    parenthetical, a heading or a summary bullet fails the build while being perfectly correct,
+    and a checker that fails on correct prose is a checker somebody will route around. The
+    paragraph is the right unit: it is small enough that an inverted sentence a hundred lines
+    away is still caught, and large enough that "That +5.53% is the estimator's bias and nothing
+    else" can follow the sentence that anchored it.
     """
     findings: list[Finding] = []
     checked = 0
     quoted = 0
     tokens = {name: number_tokens(text) for name, text in documents.items()}
-    row_spans = {
-        name: covered_spans(text, [normalise(row) for row in payload.get("rows", {}).values()])
-        for name, text in documents.items()
-    }
+    rows = [normalise(row) for row in payload.get("rows", {}).values()]
+    paragraphs = {name: split_paragraphs(text) for name, text in documents.items()}
 
     for metric in SPEC.metrics:
         if not metric.checked:
@@ -325,7 +341,11 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
         checked += 1
 
         ambiguous = is_ambiguous(value)
-        anchored_in = [name for name, text in documents.items() if any(a in text for a in anchors)]
+        anchored_in = [
+            name
+            for name, blocks in paragraphs.items()
+            if any(anchor in block for block in blocks for anchor in anchors)
+        ]
         if not anchored_in:
             findings.append(
                 Finding(
@@ -342,23 +362,31 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
             # coincidence in version strings, headings and dates.
             continue
 
-        for name, text in documents.items():
+        for name in documents:
             if value not in tokens[name]:
                 continue
             quoted += 1
-            allowed = covered_spans(text, anchors) + row_spans[name]
-            for start, stop in value_occurrences(text, value):
-                if any(low <= start and stop <= high for low, high in allowed):
+            for paragraph in paragraphs[name]:
+                occurrences = value_occurrences(paragraph, value)
+                if not occurrences:
                     continue
-                context = text[max(0, start - 60) : stop + 60].strip()
-                findings.append(
-                    Finding(
-                        name,
-                        "stale",
-                        f"{key} is written as {value} outside any of its anchor phrases, in "
-                        f"...{context}... (anchors: " + " | ".join(anchors) + ")",
+                if any(anchor in paragraph for anchor in anchors):
+                    # The claim is made properly in this paragraph, so a back reference, a
+                    # parenthetical or a summary line beside it is allowed to repeat the figure.
+                    continue
+                allowed = covered_spans(paragraph, rows)
+                for start, stop in occurrences:
+                    if any(low <= start and stop <= high for low, high in allowed):
+                        continue
+                    context = paragraph[max(0, start - 60) : stop + 60].strip()
+                    findings.append(
+                        Finding(
+                            name,
+                            "stale",
+                            f"{key} is written as {value} in a paragraph that does not claim "
+                            f"it: ...{context}... (anchors: " + " | ".join(anchors) + ")",
+                        )
                     )
-                )
     return findings, checked, quoted
 
 
@@ -489,7 +517,7 @@ def load_documents(names: list[str]) -> tuple[dict[str, str], dict[str, str], di
         if not path.exists():
             raise SystemExit(f"checked document {name} does not exist")
         text = path.read_text(encoding="utf-8")
-        stripped[name] = normalise(strip_code(text))
+        stripped[name] = strip_code(text)
         normalised[name] = normalise(text)
         verbatim[name] = text
     return stripped, normalised, verbatim

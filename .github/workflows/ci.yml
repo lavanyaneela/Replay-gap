@@ -126,6 +126,9 @@ jobs:
       - name: Fail if any document has drifted from the measurements
         run: python tools/check_numbers.py --strict-reverse
 
+      - name: Fail if any absolute duration is published as a claim
+        run: python tools/check_durations.py
+
       - name: Prove the checker still fails when it should
         run: |
           bash tools/prove_receipts.sh > /tmp/receipts-proof.md
