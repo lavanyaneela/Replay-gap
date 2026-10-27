@@ -25,7 +25,7 @@ they push on the simulation.
 replay-gap evaluate incumbent --no-ranker
 ```
 
-Naive replay lift **+5.53%**. True lift **+0.00%**, exactly, because the policy being evaluated
+Naive replay lift +5.53%, against a true lift of exactly +0.00%, because the policy being evaluated
 and the policy that produced the log are the same object. The figure was computed on 17,187
 sessions, 34.4% of the log.
 
@@ -81,7 +81,7 @@ all. It follows from what the estimator reads.
 replay-gap evaluate contrarian_sharp --no-ranker   # exits 2
 ```
 
-Effective sample size 810 of 50,000, which is 1.62% of the log. The tool refuses rather than
+Effective sample size 810 of 50,000 logged sessions, which is 1.62% of the log. The tool refuses rather than
 estimating. Had it answered, SNIPS would have reported +25.97% where the true lift is +21.53%,
 and plain IPS reports -9.95%, the wrong sign by thirty points.
 
@@ -198,7 +198,8 @@ matches phrases rather than digits, because searching for digits passes while th
 around them goes stale, and a reverse check fails on any number in the prose that no measurement
 accounts for.
 
-**If pushed on "who checks the checker":** two audits did, and between them found four holes. The anchor rule
+**If pushed on "who checks the checker":** three audits did, and between them found six holes,
+which is the honest headline about this mechanism. The anchor rule
 required a phrase to appear somewhere in the checked set rather than in the document making the
 claim, so a README whose every framing sentence had gone stale passed because the defense guide
 still carried the wording. And fenced blocks were stripped before checking, which left the two
@@ -209,9 +210,18 @@ current and says nothing about a fabricated line beside them, so a fabricated me
 the headline block passed the build. And two metrics had been given the same anchor
 phrase, so deleting one claim outright left the other satisfying the check on its behalf.
 
-All four are fixed, each has a case in the transcript, and a test asserts that every case in
-the transcript is a failure. The honest summary is that the mechanism was wrong twice in ways
-I did not find myself, which is the argument for having something adversarial read it.
+A third pass found two more. The insertion fix had been scoped to regions already containing a
+percent sign, so "a 2,400,000 session log" in a fence and a throughput claim in a code span
+both passed, and a figure in image alt text passed too. And the anchor rule was per document,
+which still allowed a sentence inverting the central finding, quoting the right number, to sit
+a hundred lines from the sentence stating it correctly. The rule is now per occurrence: every
+place a figure is written has to sit inside one of its anchor phrases or inside a guarded line.
+
+All six are fixed, each has a case in the transcript, which now runs ten corruptions, and a
+test asserts that every case in it is a failure. The honest summary is that this mechanism was
+wrong six times in ways I did not find myself. That is the argument for having something
+adversarial read your work, and it is also why the transcript is committed rather than
+described.
 
 ## Things to say, and things not to say
 

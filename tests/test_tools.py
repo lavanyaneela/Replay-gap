@@ -38,14 +38,43 @@ def run(*args: str, cwd: Path | None = None, env: dict | None = None):
 
 
 def test_the_experiment_runner_can_import_the_experiments_it_runs():
-    """The break an audit found. Nothing under src/ imports this, so coverage cannot see it."""
-    result = run(str(TOOLS / "run_experiments.py"), "--help")
-    assert result.returncode == 0, result.stderr
+    """The break an audit found. Nothing under src/ imports this, so coverage cannot see it.
+
+    This uses --dry-run rather than --help, and the distinction is the whole test. An earlier
+    version ran --help, which argparse answers and exits before the import loop is reached, so
+    it passed against the broken runner: a green check certifying a property it never looked
+    at. --dry-run imports every experiment and stops. The test below proves that it regresses.
+    """
+    result = run(str(TOOLS / "run_experiments.py"), "--dry-run")
+    assert result.returncode == 0, result.stdout + result.stderr
     assert "ModuleNotFoundError" not in result.stderr
+    assert "5 experiment(s) importable" in result.stdout
+
+
+def test_the_regression_test_above_actually_fails_against_the_broken_runner(tmp_path):
+    """A regression test that does not fail on the regression is worse than no test at all.
+
+    This reconstructs the pre-fix runner by removing the one line that puts the repository root
+    on sys.path, then asserts that --help still passes against it, which is why the first
+    version of the test above was useless, and that --dry-run does not.
+    """
+    source = (TOOLS / "run_experiments.py").read_text(encoding="utf-8")
+    marker = "sys.path.insert(0, str(Path(__file__).resolve().parents[1]))"
+    assert marker in source, "the import path fix is gone, so this test is checking nothing"
+    broken = tmp_path / "run_experiments_without_the_fix.py"
+    broken.write_text(source.replace(marker, "pass"), encoding="utf-8")
+
+    helped = run(str(broken), "--help")
+    assert helped.returncode == 0, "argparse answers --help before any import, as expected"
+    assert "ModuleNotFoundError" not in helped.stderr
+
+    dry = run(str(broken), "--dry-run")
+    assert dry.returncode != 0, "--dry-run must reach the import and fail without the fix"
+    assert "ModuleNotFoundError" in dry.stderr
 
 
 def test_the_experiment_runner_lists_every_experiment_the_repository_publishes():
-    result = run(str(TOOLS / "run_experiments.py"), "--help")
+    result = run(str(TOOLS / "run_experiments.py"), "--dry-run")
     for name in (
         "e1_sign_agreement",
         "e2_overlap_curve",
@@ -53,7 +82,7 @@ def test_the_experiment_runner_lists_every_experiment_the_repository_publishes()
         "e4_detectable_lift",
         "e5_propensity_misspecification",
     ):
-        assert name in result.stdout
+        assert f"{name}: imported from" in result.stdout
 
 
 def test_the_experiment_runner_rejects_an_experiment_that_does_not_exist():

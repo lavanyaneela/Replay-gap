@@ -65,15 +65,15 @@ from metrics_spec import SPEC  # noqa: E402
 METRICS_PATH = Path("docs/metrics.json")
 
 FENCE = re.compile(r"```.*?```", re.DOTALL)
-# A fence with a language tag is source: a command line, a SQL statement, a Python snippet.
-# A fence with no tag is how captured terminal output is written in this repository, so that is
-# where a fabricated figure would hide and that is what gets swept.
-OUTPUT_FENCE = re.compile(r"```[ \t]*\n(.*?)```", re.DOTALL)
 INLINE_CODE = re.compile(r"`[^`\n]*`")
 HTML_TAG = re.compile(r"<[^>]+>")
 LINK_TARGET = re.compile(r"\]\([^)]*\)")
 IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 ADR_REFERENCE = re.compile(r"ADR-\d+")
+# Alt text is prose: a screen reader speaks it and a broken image shows it. A src or a width is
+# not, so neither is swept.
+IMAGE_ALT = re.compile(r"!\[([^\]]*)\]\([^)]*\)")
+HTML_ALT = re.compile(r'\balt="([^"]*)"')
 
 NUMBER = re.compile(r"(?<![\w.])([+-]?\d[\d,]*(?:\.\d+)?)(?<![.,])\s*(%?)")
 
@@ -102,6 +102,7 @@ ALLOWED_BARE = {
     "200",
     "720",
     "30,240",  # ten candidates over five positions, the slate length ADR-002 rejects
+    "0.5",  # the quantile argument in PERCENTILE_CONT(0.5), which is SQL rather than a result
     "2026",
     "3.11",
     "3.12",
@@ -173,20 +174,29 @@ def assert_no_anchor_is_shared(payload: dict) -> list[Finding]:
     create. An audit found this between the two figures that both render 1.62%, and deleting
     the sweep claim from the README passed.
     """
-    shared: dict[str, list[str]] = {}
-    for key, anchors in payload["anchors"].items():
-        for anchor in anchors:
-            shared.setdefault(normalise(anchor), []).append(key)
-    return [
-        Finding(
-            "metrics_spec.py",
-            "shared anchor",
-            f"{anchor!r} is the anchor of {' and '.join(keys)}, so either claim satisfies the "
-            "check for both and one of them can be deleted unnoticed",
-        )
-        for anchor, keys in sorted(shared.items())
-        if len(keys) > 1
+    rendered: list[tuple[str, str]] = [
+        (normalise(anchor), key)
+        for key, anchors in payload["anchors"].items()
+        for anchor in anchors
     ]
+    findings: list[Finding] = []
+    for index, (anchor, key) in enumerate(rendered):
+        for other_anchor, other_key in rendered[index + 1 :]:
+            if other_key == key:
+                continue
+            # Containment matters as much as equality. An audit found that renaming one anchor
+            # to "sweep ends at 1.62%" left the other's "ends at 1.62%" as a suffix of it, so
+            # one sentence still satisfied both metrics and the property was still violated.
+            if anchor == other_anchor or anchor in other_anchor or other_anchor in anchor:
+                findings.append(
+                    Finding(
+                        "metrics_spec.py",
+                        "shared anchor",
+                        f"{anchor!r} and {other_anchor!r} guard {key} and {other_key}, so one "
+                        "sentence satisfies both and either claim can be deleted unnoticed",
+                    )
+                )
+    return findings
 
 
 @dataclass
@@ -228,29 +238,60 @@ def number_tokens(text: str) -> set[str]:
     return tokens
 
 
+def covered_spans(text: str, phrases: list[str]) -> list[tuple[int, int]]:
+    """Character ranges of the text covered by any of these phrases."""
+    spans: list[tuple[int, int]] = []
+    for phrase in phrases:
+        if not phrase:
+            continue
+        start = text.find(phrase)
+        while start != -1:
+            spans.append((start, start + len(phrase)))
+            start = text.find(phrase, start + 1)
+    return spans
+
+
+def value_occurrences(text: str, value: str) -> list[tuple[int, int]]:
+    """Every place the rendered value stands alone as a number, with its position.
+
+    Standing alone matters: without it, 810 is found inside 8,100 and 1.62% inside 11.62%.
+    """
+    spans: list[tuple[int, int]] = []
+    for match in NUMBER.finditer(text):
+        digits, percent = match.group(1), match.group(2)
+        token = f"{digits}{percent}"
+        if token != value and digits != value and digits.replace(",", "") != value.replace(",", ""):
+            continue
+        # The pattern allows whitespace before an optional percent sign, so match.end() can sit
+        # past the number itself. Using the group boundaries keeps the span on the digits, which
+        # matters because an anchor phrase ends at the number rather than after it.
+        stop = match.end(2) if percent else match.end(1)
+        spans.append((match.start(1), stop))
+    return spans
+
+
 def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Finding], int, int]:
-    """Every quoted metric must appear with one of its anchor phrases."""
+    """Every place a metric's value is written must sit inside one of its anchor phrases.
+
+    Per occurrence rather than per document, and that is the third rule this check has had. The
+    first required an anchor anywhere in the checked set, so a README whose every framing
+    sentence had gone stale passed because another file retained the wording. The second
+    required it in the quoting document, which still allowed a false sentence to sit beside a
+    true one: an audit inverted the central finding of the overlap sweep into "overlap stays
+    comfortable throughout, never dropping under 1.62%" and the build stayed green, because the
+    correct sentence about the same figure was a hundred lines further down.
+
+    So each occurrence has to be inside an anchor of its own, or inside a guarded row, which is
+    how a table cell and a line of captured output earn their place without words around them.
+    """
     findings: list[Finding] = []
     checked = 0
     quoted = 0
     tokens = {name: number_tokens(text) for name, text in documents.items()}
-
-    def anchored_elsewhere_with_same_value(document: str, value: str, exclude: str) -> bool:
-        """True when another metric rendering the same figure is anchored in this document.
-
-        Two measurements can legitimately be the same number. When one of them is anchored in
-        the document, the document is making a current, correctly worded claim about that
-        figure, and failing the other is noise rather than a finding.
-        """
-        for other in SPEC.metrics:
-            if other.key == exclude or other.key not in payload["metrics"]:
-                continue
-            if other.format(payload["metrics"][other.key]) != value:
-                continue
-            phrases = [normalise(phrase.format(value)) for phrase in other.anchors]
-            if any(phrase in document for phrase in phrases):
-                return True
-        return False
+    row_spans = {
+        name: covered_spans(text, [normalise(row) for row in payload.get("rows", {}).values()])
+        for name, text in documents.items()
+    }
 
     for metric in SPEC.metrics:
         if not metric.checked:
@@ -305,15 +346,17 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
             if value not in tokens[name]:
                 continue
             quoted += 1
-            if not any(anchor in text for anchor in anchors) and not (
-                anchored_elsewhere_with_same_value(text, value, key)
-            ):
+            allowed = covered_spans(text, anchors) + row_spans[name]
+            for start, stop in value_occurrences(text, value):
+                if any(low <= start and stop <= high for low, high in allowed):
+                    continue
+                context = text[max(0, start - 60) : stop + 60].strip()
                 findings.append(
                     Finding(
                         name,
                         "stale",
-                        f"{key} appears as {value} but none of its anchor phrases do: "
-                        + " | ".join(anchors),
+                        f"{key} is written as {value} outside any of its anchor phrases, in "
+                        f"...{context}... (anchors: " + " | ".join(anchors) + ")",
                     )
                 )
     return findings, checked, quoted
@@ -348,22 +391,26 @@ def row_check(payload: dict, documents: dict[str, str]) -> tuple[list[Finding], 
 
 
 def excluded_regions(text: str) -> str:
-    """The parts a reader reads as results: untagged fences and inline code spans.
+    """Everything the reverse sweep skips but a reader still reads as a claim.
 
-    A fence carrying a language tag is source code, and the numbers in a SQL statement or a
-    Python snippet are syntax rather than claims. An untagged fence is captured output, which
-    is where a fabricated figure would sit and be believed.
+    That is every fence whatever its language tag, every inline code span, and the alt text of
+    every image. An audit inserted a false claim into each of the three and watched the build
+    stay green, so the rule is now inclusive rather than clever: a figure a reader can see is a
+    figure that has to be measured, wherever it sits.
 
-    Link targets, image URLs and HTML attributes are left out as well, because a width
-    attribute is not a claim and sweeping one trains the reader to ignore the section.
+    An earlier version swept only fences and spans that already contained a percent sign, which
+    is why "a 2,400,000 session log" in the layout block and "41,200 slates per second" in a
+    code span both passed. The small integer exemption further down is what keeps a command
+    line argument from being treated as a measurement, and it does that job without needing a
+    percent sign to decide.
+
+    Link targets, image sources and width attributes stay out: a URL or a pixel count is not a
+    claim, and sweeping them trains a reader to ignore the section.
     """
-    regions = [match.group(1) for match in OUTPUT_FENCE.finditer(text)]
-    for match in INLINE_CODE.finditer(text):
-        span = match.group(0)
-        # Inside a span, only a percentage reads as a result. A bare number there is an
-        # argument or part of an identifier: PERCENTILE_CONT(0.5) is SQL, not a claim.
-        if "%" in span:
-            regions.append(span)
+    regions = [match.group(0) for match in FENCE.finditer(text)]
+    regions.extend(match.group(0) for match in INLINE_CODE.finditer(text))
+    regions.extend(match.group(1) for match in IMAGE_ALT.finditer(text))
+    regions.extend(match.group(1) for match in HTML_ALT.finditer(text))
     return normalise(" ".join(regions))
 
 
@@ -419,23 +466,33 @@ def reverse_check(payload: dict, documents: dict[str, str]) -> list[Finding]:
     return findings
 
 
-def load_documents(names: list[str]) -> tuple[dict[str, str], dict[str, str]]:
-    """Each checked document twice: with code stripped, and raw.
+def load_documents(names: list[str]) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
+    """Each checked document three ways: stripped, normalised, and exactly as written.
 
     The anchor and reverse checks read the stripped text, because a command line is not a claim.
-    The row check reads the raw text, because the blocks of captured output it guards are inside
-    fences and stripping them is what let falsified figures through.
+    The row check reads the normalised text, because the blocks of captured output it guards are
+    inside fences. The excluded region check reads the text exactly as written, newlines and
+    all, because the patterns that find a fence are anchored on line breaks.
+
+    That third form exists because of a real defect. Both other forms run through normalise,
+    which collapses newlines to spaces, so a fence pattern requiring a newline could never match
+    and the function documenting it was dead code. The sweep still caught insertions, by
+    accident: on newline collapsed text a fence's three backticks pair up as inline spans, so
+    fence bodies were being captured by the wrong pattern. It worked, and a mechanism that works
+    for a reason nobody wrote down is a mechanism nobody can safely change.
     """
     stripped: dict[str, str] = {}
-    raw: dict[str, str] = {}
+    normalised: dict[str, str] = {}
+    verbatim: dict[str, str] = {}
     for name in names:
         path = Path(name)
         if not path.exists():
             raise SystemExit(f"checked document {name} does not exist")
         text = path.read_text(encoding="utf-8")
         stripped[name] = normalise(strip_code(text))
-        raw[name] = normalise(text)
-    return stripped, raw
+        normalised[name] = normalise(text)
+        verbatim[name] = text
+    return stripped, normalised, verbatim
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -454,15 +511,17 @@ def main(argv: list[str] | None = None) -> int:
     if not metrics_path.exists():
         raise SystemExit(f"{metrics_path} is missing. Run 'make receipts' or collect_metrics.py.")
     payload = json.loads(metrics_path.read_text(encoding="utf-8"))
-    documents, raw_documents = load_documents(payload["checked_documents"])
+    documents, normalised_documents, verbatim_documents = load_documents(
+        payload["checked_documents"]
+    )
 
     stale = assert_no_exemption_hides_a_metric(payload)
     stale.extend(assert_no_anchor_is_shared(payload))
     forward_findings, checked, quoted = forward_check(payload, documents)
     stale.extend(forward_findings)
-    row_findings, rows_found = row_check(payload, raw_documents)
+    row_findings, rows_found = row_check(payload, normalised_documents)
     stale.extend(row_findings)
-    stale.extend(excluded_region_check(payload, raw_documents))
+    stale.extend(excluded_region_check(payload, verbatim_documents))
     unguarded = reverse_check(payload, documents)
 
     print(

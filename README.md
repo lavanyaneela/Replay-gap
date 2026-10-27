@@ -36,7 +36,7 @@ structurally unanswerable:
   quality mixed in. It was computed on 17,187 sessions, 34.4% of the log.
 - **Over 180 candidate rankers, naive replay picks the wrong winner in 27.1% of decisive
   cases.** The worst one: a ranker whose true lift is -10.80% read as +6.24%, a gap of 17.04%.
-  SNIPS, on the same scenarios, gets the sign wrong in 1.8%.
+  SNIPS, on the same scenarios, gets the sign wrong in 1.8% of them.
 - **The correction is not a fix either.** SNIPS calls a policy that is actually -0.05% a ship at
   +0.09%, at 97% of the log still effective. The log cannot resolve a question that fine, and
   the tool says so.
@@ -45,7 +45,7 @@ structurally unanswerable:
   *climbs*, in all 3 of the crossovers measured. That is a real limit of this design, not a bug
   in it.
 
-372 tests at 100% line coverage, one seed, offline after install. 371 of them run anywhere; the
+373 tests at 100% line coverage, one seed, offline after install. 372 of them run anywhere; the
 one that does not is the PostgreSQL parity test that needs a live server, and the rest of that
 module checks the dialect contract without one.
 Every numeral in this document is re-measured by CI and checked against the sentence around it,
@@ -111,7 +111,7 @@ reason                  corrected lift of +0.00% is not distinguishable from zer
 
 The incumbent is the deployed ranker re-evaluated as though it were a candidate. Its true lift
 over itself is exactly zero, not approximately zero, because the policy and the referee are the
-same object. So the +5.53% is pure estimator bias, and it is the cleanest possible measurement
+same object. So the replay lift +5.53% is pure estimator bias, and it is the cleanest measurement
 of the effect: no model quality, no noise, no argument about what the true value should have
 been.
 
@@ -180,7 +180,7 @@ it, and the same sweep ends at 1.62%, below the floor, where the tool refuses.
 
 | | what it costs | what it buys |
 | --- | --- | --- |
-| Correcting with importance weights | Effective sample size, by up to a factor of 60 | The sign is right in 1.8% wrong rather than 27.1% |
+| Correcting with importance weights | Effective sample size, by up to a factor of 60 | The sign is wrong in 1.8% of decisive cases rather than 27.1% of them |
 | Capping the weights | Bias towards the logged behaviour, on exactly the sessions where the candidate disagreed most | A variance that does not depend on the single largest weight |
 | Refusing below the overlap floor | Questions go unanswered that a replay would have answered | No confident number on a log that cannot support one |
 | Self normalising rather than plain IPS | A small bias that does not vanish with sample size | An estimate bounded by the rewards that actually occurred |
@@ -399,8 +399,8 @@ Plackett-Luce by construction, so its propensities are a closed form. Real logs 
 the wrong granularity, or before a reranking step, or reconstruct them from a checkpoint that
 has moved. E5 corrupts them deliberately: the correction stops being worth having at a
 corruption factor of 3.0, and the effective sample size at that point reads higher than on the
-clean log, in all 3 crossovers. **No diagnostic here detects a propensity that is confidently
-wrong**, and closing that needs an external signal such as a randomised serving holdout.
+clean log: that happened at every one of the 3 crossovers the sweep produced. **No diagnostic
+here detects a propensity that is confidently wrong**, and closing that needs an external signal such as a randomised serving holdout.
 
 **The world is synthetic, and retrieval is deliberately unbiased.** In production the retrieval
 stage is itself a policy trained on logged data, so the candidate set is confounded before the
@@ -486,11 +486,15 @@ that file is a failure. A checker nobody has watched fail is a checker nobody sh
 and a transcript nobody re-checks will eventually contain a case that quietly passes. An audit
 of this repository found exactly that, which is why the test exists.
 
-It matches **phrases, not digits**. A checker searching for the digits of a metric passes
+It matches **phrases, not digits**, and it matches them **per occurrence**. A checker searching for the digits of a metric passes
 happily while the sentence around them has gone stale: "45 disagreements" is still found in a
 document that now says "45 scenarios". So each metric carries anchor phrases, the number
-together with two or three words of its context, and any one of them matching is enough, because
-the same figure reads differently in a table and in a sentence. A reverse check sweeps every
+together with two or three words of its context, and every place the figure is written has to
+sit inside one of them. Per document was not enough: an audit inverted this document's central
+finding into a sentence that still quoted the right number, and the build stayed green because
+the correct sentence about the same figure was a hundred lines further down. A table cell and a
+line of captured output have no words around them, so those earn their place by being guarded
+as whole rendered lines instead. A reverse check sweeps every
 number and fails on any that no measurement accounts for, which is the half that catches a
 figure edited to a different figure: the old value simply stops appearing, so a check that only
 looks for quotations of the current value has nothing to complain about. The same sweep runs
@@ -501,8 +505,11 @@ The guarantee covers numerals, in prose, in tables, inside blocks of captured ou
 any inline span carrying a percentage. A figure spelled out in words ("sixteen points", "a
 factor of six") is not seen by either check, so this document pairs a spelled figure with its
 digits wherever the figure is load bearing, and the spelled form is a reading aid rather than
-the claim. A fence carrying a language tag is source rather than a result and is not swept: the
-numbers in a SQL statement or a command line are syntax.
+the claim. Every fence is swept whatever its language tag, along with every inline code span and the alt
+text of every image, because an audit inserted a false claim into each of those three and
+watched the build stay green. What is not swept is a link target, an image source and a width
+attribute, since a URL and a pixel count are not claims. A bare one or two digit integer is
+exempt wherever it appears, because it is an argument rather than a measurement.
 
 ## Tech stack
 
@@ -515,7 +522,7 @@ numbers in a SQL statement or a command line are syntax.
 | LightGBM | the candidate ranker and the outcome model | LambdaMART on implicit feedback is what a team actually ships, including the lie that an un-impressed candidate is a negative |
 | MLflow | tracking and a model registry, on local SQLite | the filesystem backend is refused by current releases and never had a registry; SQLite keeps the offline rule and makes registration real |
 | Playwright | screenshots and the demo replay | the only thing in the pipeline that can see pixels, which is where the invisible badge was caught |
-| pytest and ruff | 372 tests and the lint gate | coverage at 100%, measured rather than asserted |
+| pytest and ruff | 373 tests and the lint gate | coverage at 100%, measured rather than asserted |
 
 ## Decisions
 

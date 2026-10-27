@@ -1,7 +1,7 @@
 {
   "metrics": {
-    "tests_total": 372,
-    "tests_executed": 371,
+    "tests_total": 373,
+    "tests_executed": 372,
     "coverage_line_pct": 1.0,
     "incumbent_naive_lift": 0.05525198631872463,
     "incumbent_naive_matched": 17187,
@@ -32,7 +32,6 @@
     "e1_worst_gap": 0.1703925695475783,
     "e2_end_ess_fraction": 0.16172574090991368,
     "e2_collapse_factor": 6.183307582167958,
-    "e2_end_ess_fraction_sharpened": 0.016200357855423037,
     "e2_naive_lift_at_end": 0.18200372412720345,
     "e2_true_lift_at_end": 0.1256512468173061,
     "e3_replicates": 24,
@@ -52,8 +51,8 @@
     "e5_crossed": 3
   },
   "formatted": {
-    "tests_total": "372",
-    "tests_executed": "371",
+    "tests_total": "373",
+    "tests_executed": "372",
     "coverage_line_pct": "100%",
     "incumbent_naive_lift": "+5.53%",
     "incumbent_naive_matched": "17,187",
@@ -84,7 +83,6 @@
     "e1_worst_gap": "17.04%",
     "e2_end_ess_fraction": "16.17%",
     "e2_collapse_factor": "6",
-    "e2_end_ess_fraction_sharpened": "1.62%",
     "e2_naive_lift_at_end": "+18.20%",
     "e2_true_lift_at_end": "+12.57%",
     "e3_replicates": "24",
@@ -105,11 +103,11 @@
   },
   "anchors": {
     "tests_total": [
-      "372 tests"
+      "373 tests"
     ],
     "tests_executed": [
-      "371 of them run",
-      "371 tests run"
+      "372 of them run",
+      "372 tests run"
     ],
     "coverage_line_pct": [
       "100% line coverage",
@@ -137,8 +135,9 @@
     ],
     "sharp_ess_fraction": [
       "sample size is 1.62%",
-      "ends at 1.62%",
-      "1.62% of the log"
+      "which is 1.62% of the log",
+      "is 1.62% and the tool",
+      "sweep ends at 1.62%"
     ],
     "sharp_snips_lift": [
       "would have reported +25.97%",
@@ -204,7 +203,8 @@
     "e1_naive_sign_disagreement_rate": [
       "27.1% of decisive",
       "sign in 27.1%",
-      "wrong in 27.1%"
+      "wrong in 27.1% of",
+      "rather than 27.1% of"
     ],
     "e1_naive_sign_disagreements": [
       "45 of",
@@ -212,7 +212,8 @@
     ],
     "e1_snips_sign_disagreement_rate": [
       "SNIPS 1.8%",
-      "to 1.8%"
+      "to 1.8%",
+      "wrong in 1.8% of"
     ],
     "e1_naive_overclaim_rate": [
       "96% of scenarios",
@@ -238,10 +239,6 @@
       "factor of 6",
       "6 times smaller"
     ],
-    "e2_end_ess_fraction_sharpened": [
-      "sweep ends at 1.62%",
-      "sharpened to 1.62%"
-    ],
     "e2_naive_lift_at_end": [
       "still reports +18.20%",
       "reports +18.20% at"
@@ -251,17 +248,15 @@
       "true lift is +12.57%"
     ],
     "e3_replicates": [
-      "24 replicates",
-      "all 24 replicates",
-      "24 independent"
+      "24 independent replicates"
     ],
     "e3_popularity_true_lift": [
       "true lift is -2.23%",
       "worth -2.23% to"
     ],
     "e3_popularity_naive_sign_errors": [
-      "24 of",
-      "all 24 "
+      "sign wrong on all 24 replicates",
+      "wrong on all 24 replicates"
     ],
     "e3_serving_true_gap": [
       "differ by 16.39%",
@@ -285,7 +280,6 @@
       "typically 2.09%"
     ],
     "e4_policies_above_target": [
-      "5 of",
       "for 5 of"
     ],
     "e4_informative_policies": [
@@ -305,12 +299,12 @@
       "still 12.3%"
     ],
     "e5_crossings_where_ess_rose": [
-      "3 of",
-      "in all 3 "
+      "in all 3 of the crossovers",
+      "in all 3 crossovers"
     ],
     "e5_crossed": [
-      "of 3 ",
-      "all 3 "
+      "of the 3 crossovers",
+      "3 of them crossed"
     ]
   },
   "rows": {
@@ -379,7 +373,6 @@
     "e1_worst_gap": "the gap on the worst overclaim",
     "e2_end_ess_fraction": "what the log is worth at the end of the optimistic sweep",
     "e2_collapse_factor": "how far the log falls on the model axis alone",
-    "e2_end_ess_fraction_sharpened": "what the log is worth once serving is sharpened too",
     "e2_naive_lift_at_end": "what naive replay still reports at the end of the sweep",
     "e2_true_lift_at_end": "the truth at the end of the sweep",
     "e3_replicates": "independent replicates in E3",

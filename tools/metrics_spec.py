@@ -176,7 +176,12 @@ METRICS: tuple[Metric, ...] = (
         path=("contrarian_sharp", "overlap", "ess_fraction"),
         description="effective sample size as a share of the log, greedily served",
         unit="percent",
-        anchors=("sample size is {}", "ends at {}", "{} of the log"),
+        anchors=(
+            "sample size is {}",
+            "which is {} of the log",
+            "is {} and the tool",
+            "sweep ends at {}",
+        ),
     ),
     Metric(
         key="sharp_snips_lift",
@@ -303,7 +308,7 @@ METRICS: tuple[Metric, ...] = (
         description="how often naive replay disagrees with the referee about the sign",
         unit="percent",
         digits=1,
-        anchors=("{} of decisive", "sign in {}", "wrong in {}"),
+        anchors=("{} of decisive", "sign in {}", "wrong in {} of", "rather than {} of"),
     ),
     Metric(
         key="e1_naive_sign_disagreements",
@@ -320,7 +325,7 @@ METRICS: tuple[Metric, ...] = (
         description="how often SNIPS disagrees with the referee about the sign",
         unit="percent",
         digits=1,
-        anchors=("SNIPS {}", "to {}"),
+        anchors=("SNIPS {}", "to {}", "wrong in {} of"),
     ),
     Metric(
         key="e1_naive_overclaim_rate",
@@ -373,14 +378,6 @@ METRICS: tuple[Metric, ...] = (
         anchors=("factor of {}", "{} times smaller"),
     ),
     Metric(
-        key="e2_end_ess_fraction_sharpened",
-        source="e2_overlap_curve",
-        path=("end_ess_fraction_sharpened",),
-        description="what the log is worth once serving is sharpened too",
-        unit="percent",
-        anchors=("sweep ends at {}", "sharpened to {}"),
-    ),
-    Metric(
         key="e2_naive_lift_at_end",
         source="e2_overlap_curve",
         path=("naive_lift_at_end",),
@@ -403,7 +400,7 @@ METRICS: tuple[Metric, ...] = (
         path=("replicates",),
         description="independent replicates in E3",
         unit="integer",
-        anchors=("{} replicates", "all {} replicates", "{} independent"),
+        anchors=("{} independent replicates",),
     ),
     Metric(
         key="e3_popularity_true_lift",
@@ -419,7 +416,7 @@ METRICS: tuple[Metric, ...] = (
         path=("summary", "popularity", "naive_sign_errors"),
         description="replicates where naive replay got the popularity baseline's sign wrong",
         unit="integer",
-        anchors=("{} of", "all {} "),
+        anchors=("sign wrong on all {} replicates", "wrong on all {} replicates"),
     ),
     Metric(
         key="e3_serving_true_gap",
@@ -468,7 +465,7 @@ METRICS: tuple[Metric, ...] = (
         path=("policies_above_target",),
         description="policies whose minimum detectable lift exceeds one percent",
         unit="integer",
-        anchors=("{} of", "for {} of"),
+        anchors=("for {} of",),
     ),
     Metric(
         key="e4_informative_policies",
@@ -511,7 +508,7 @@ METRICS: tuple[Metric, ...] = (
         path=("n_crossings_where_ess_rose",),
         description="crossovers where the diagnostic improved as the estimate decayed",
         unit="integer",
-        anchors=("{} of", "in all {} "),
+        anchors=("in all {} of the crossovers", "in all {} crossovers"),
     ),
     Metric(
         key="e5_crossed",
@@ -519,7 +516,7 @@ METRICS: tuple[Metric, ...] = (
         path=("n_crossed",),
         description="policies whose correction stopped being worth having",
         unit="integer",
-        anchors=("of {} ", "all {} "),
+        anchors=("of the {} crossovers", "{} of them crossed"),
     ),
 )
 
