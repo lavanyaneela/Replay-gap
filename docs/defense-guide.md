@@ -211,7 +211,7 @@ the headline block passed the build. And two metrics had been given the same anc
 phrase, so deleting one claim outright left the other satisfying the check on its behalf.
 
 A third pass found two more. The insertion fix had been scoped to regions already containing a
-percent sign, so "a 2,400,000 session log" in a fence and a throughput claim in a code span
+percent sign, so a fabricated session count in a fence and a throughput claim in a code span
 both passed, and a figure in image alt text passed too. And the anchor rule was per document,
 which still allowed a sentence inverting the central finding, quoting the right number, to sit
 a hundred lines from the sentence stating it correctly. The rule is now per occurrence: every

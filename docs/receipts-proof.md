@@ -14,27 +14,25 @@ sitting a hundred lines from the sentence that states it correctly.
 
 ```
 === 1. The repository as committed ===
-exit 1
+exit 0
 checked 49 measured figures and 31 table rows against 7 document(s); 153 quotation(s) found
+every published figure traces to code that ran
 
 === 2. One published figure moved by two hundredths of a point ===
 exit 1
   UNGUARDED README.md: unguarded: +5.51% matches no measured figure
-  UNGUARDED docs/defense-guide.md: unguarded: 2,400,000 matches no measured figure
-2 unguarded number(s) and --strict-reverse is set.
+1 unguarded number(s) and --strict-reverse is set.
 
 === 3. Digits untouched, every sentence that framed them rewritten ===
 exit 1
   STALE     README.md: stale: incumbent_naive_lift is written as +5.53% outside any of its anchor phrases, in ...laying the deployed ranker against its own log says it is **+5.53% uplift versus itself.** ## Four questions this answers that... (anchors: +5.53% better than itself | log reports +5.53% | replay lift +5.53%)
   STALE     README.md: stale: incumbent_naive_lift is written as +5.53% outside any of its anchor phrases, in ...- **Replaying the deployed ranker against its own log shows +5.53%.** Its true lift over itself is zero, because it is itself.... (anchors: +5.53% better than itself | log reports +5.53% | replay lift +5.53%)
-  UNGUARDED docs/defense-guide.md: unguarded: 2,400,000 matches no measured figure
 2 stale figure(s). A document quotes a number the code no longer
 
 === 4. One cell edited inside a guarded table row ===
 exit 1
   STALE     checked documents: stale: no document contains the current e2_row_06 row: | 50% | +9.17% | +11.81% | +9.05% | 23,223 | 36 |
   UNGUARDED README.md: unguarded: 23,224 matches no measured figure
-  UNGUARDED docs/defense-guide.md: unguarded: 2,400,000 matches no measured figure
 1 stale figure(s). A document quotes a number the code no longer
 
 === 5. A figure falsified inside a fenced block of captured output ===
@@ -47,8 +45,7 @@ exit 1
 === 6. A number added that nothing measures ===
 exit 1
   UNGUARDED README.md: unguarded: 61.4% matches no measured figure
-  UNGUARDED docs/defense-guide.md: unguarded: 2,400,000 matches no measured figure
-2 unguarded number(s) and --strict-reverse is set.
+1 unguarded number(s) and --strict-reverse is set.
 
 === 7. A fabricated line inserted into the block of captured output ===
 exit 1
@@ -76,6 +73,7 @@ exit 1
 1 stale figure(s). A document quotes a number the code no longer
 
 === 12. Restored ===
-exit 1
+exit 0
 checked 49 measured figures and 31 table rows against 7 document(s); 153 quotation(s) found
+every published figure traces to code that ran
 ```
