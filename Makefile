@@ -5,7 +5,7 @@
 PYTHON ?= python3
 PACKAGE := replay_gap
 
-.PHONY: help install lint format test fixtures experiments receipts prove-receipts verify evidence set-handle clean
+.PHONY: help install lint format test fixtures experiments receipts prove-receipts verify evidence check-render set-handle clean
 
 help:
 	@echo "install      install the package and its development extras"
@@ -17,6 +17,7 @@ help:
 	@echo "prove-receipts  corrupt the README five ways and watch the checker fail each one"
 	@echo "verify       lint + test + receipts. This is the command the README promises."
 	@echo "evidence     regenerate the diagram, screenshots and demo replay (needs extras)"
+	@echo "check-render render the README with cmark-gfm and assert every image resolves"
 	@echo "set-handle   point the badge and clone URLs at a real account (HANDLE=you)"
 
 install:
@@ -61,10 +62,12 @@ evidence:
 	$(PYTHON) tools/render_diagrams.py
 	$(PYTHON) tools/capture_screenshots.py
 	$(PYTHON) tools/record_demo.py
+	$(PYTHON) tools/check_rendering.py
 
 # The repository ships with a placeholder account name, because the author's GitHub handle is
-# not a fact this repository has, and a wrong name in a badge URL renders as "unknown", which
-# is the first thing a reviewer notices.
+# not a fact this repository has. The CI badge is not committed at all for the same reason: a
+# badge URL naming an account that does not exist renders as "unknown", and that is the first
+# thing a reviewer notices. This target fills in the clone URL and adds the badge together.
 #
 # The file list is explicit rather than a repository wide grep. The first version grepped
 # everything, matched this Makefile's own comment, rewrote its own placeholder on the first run,
@@ -75,8 +78,12 @@ set-handle:
 	@grep -q GITHUB_USERNAME $(HANDLE_FILES) || { \
 		echo 'no GITHUB_USERNAME placeholder left in $(HANDLE_FILES); nothing to do'; exit 1; }
 	@sed -i 's|github.com/GITHUB_USERNAME/|github.com/$(HANDLE)/|g' $(HANDLE_FILES)
-	@echo "pointed the badge and clone URLs at github.com/$(HANDLE)/replay-gap"
+	@sed -i 's|^<!-- CI_BADGE:.*-->$$|[![verify](https://github.com/$(HANDLE)/replay-gap/actions/workflows/ci.yml/badge.svg)](https://github.com/$(HANDLE)/replay-gap/actions/workflows/ci.yml)|' README.md
+	@echo "pointed the clone URL at github.com/$(HANDLE)/replay-gap and added the CI badge"
 	@grep -n "github.com/$(HANDLE)/" $(HANDLE_FILES)
+
+check-render:
+	$(PYTHON) tools/check_rendering.py
 
 clean:
 	rm -rf reports .pytest_cache .ruff_cache .coverage coverage.xml

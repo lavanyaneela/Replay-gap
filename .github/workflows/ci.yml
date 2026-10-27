@@ -218,6 +218,28 @@ jobs:
           PGDATABASE: replaygap
         run: python -m pytest -q -m postgres --no-cov
 
+  # The README's own rendering. A broken image reports nothing in any console, so the first
+  # person to notice one is a reviewer looking at the repository.
+  rendering:
+    name: README renders
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install the package with the evidence extras
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,evidence]"
+          python -m playwright install --with-deps chromium
+
+      - name: Render the README with cmark-gfm and check every image resolves
+        run: python tools/check_rendering.py
+
   # A reviewer following only the README, in a fresh directory, with no network. This is the
   # one promise the README makes that cannot be checked by any other job.
   clone-and-verify:

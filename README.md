@@ -1,6 +1,6 @@
 # replay-gap
 
-[![verify](https://github.com/GITHUB_USERNAME/replay-gap/actions/workflows/ci.yml/badge.svg)](https://github.com/GITHUB_USERNAME/replay-gap/actions/workflows/ci.yml)
+<!-- CI_BADGE: added by "make set-handle HANDLE=you", because a badge URL with the wrong account renders as unknown -->
 [![python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](pyproject.toml)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![offline](https://img.shields.io/badge/make%20verify-offline-informational)](Makefile)
@@ -351,7 +351,10 @@ fails the run if the verdict badge is not legible against its background.
 ![A replay of captured terminal output, paced by the measured duration of each command](docs/video/demo.gif)
 
 The recording is a replay, not a screen capture: every line of terminal text is real captured
-stdout, and each segment is paced by that command's measured wall time.
+stdout, and each segment is paced by that command's measured wall time. `make check-render`
+renders this document with cmark-gfm, the library GitHub itself uses, and fails if any image
+above does not resolve, because a broken image reports nothing in any console and the first
+person to see one is a reviewer.
 [`docs/video/manifest.json`](docs/video/manifest.json) lists every command with its exit code
 and duration.
 
@@ -457,6 +460,8 @@ make experiments  run E1 to E5 and write docs/experiments/*.json
 make receipts     re-measure every published figure and check it against the prose
 make verify       lint + test + receipts. The command this README promises.
 make evidence     regenerate the diagram, the screenshots and the demo replay
+make check-render render the README with cmark-gfm and assert every image resolves
+make set-handle   point the clone URL at a real account and add the CI badge
 ```
 
 `make receipts` runs two scripts. `collect_metrics.py` re-measures every published figure and
