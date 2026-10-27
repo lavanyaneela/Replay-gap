@@ -10,6 +10,9 @@ world:
   n_contexts: 5000          # distinct users drawn from those segments
   relevance_scale: 2.4      # multiplies the context-item dot product inside the sigmoid
   quality_spread: 0.55      # per-item global quality, which is what a popularity baseline sees
+  segment_jitter: 0.45      # how far a user strays from their segment centroid. Larger means a
+                            # less learnable world, so this is the knob that decides whether a
+                            # ranker trained on the log has anything real to find.
 
 slate:
   n_candidates: 10          # items retrieved per session, the action space the policy ranks
@@ -29,6 +32,10 @@ log:
 policies:
   temperature: 1.0          # candidate policies are stochastic too, or every weight would be 0 or inf
   sharp_temperature: 0.25   # the same ranker served greedily, which is what collapses overlap
+  clone_noise: 0.10         # how far incumbent_clone strays from the incumbent. This is what
+                            # sets the repository's honest failure case: a true lift too small
+                            # for the log to resolve, which the corrected estimator still calls
+                            # a ship.
 
 ranker:
   # LightGBM LambdaMART trained on the logged data, counting every un-impressed candidate as a

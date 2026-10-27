@@ -93,6 +93,7 @@ def build_fixture(config: Config, n_sessions: int | None = None) -> Fixture:
         n_contexts=config.world.n_contexts,
         relevance_scale=config.world.relevance_scale,
         quality_spread=config.world.quality_spread,
+        segment_jitter=config.world.segment_jitter,
         examination=np.asarray(config.slate.examination, dtype=np.float64),
         rng=rng,
     )

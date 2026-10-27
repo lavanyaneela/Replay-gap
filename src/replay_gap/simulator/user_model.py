@@ -104,6 +104,7 @@ def build_world(
     n_contexts: int,
     relevance_scale: float,
     quality_spread: float,
+    segment_jitter: float,
     examination: np.ndarray,
     rng: np.random.Generator,
 ) -> World:
@@ -120,7 +121,7 @@ def build_world(
 
     centroids = unit_rows(rng.normal(size=(n_segments, n_item_features)))
     segment = rng.integers(0, n_segments, size=n_contexts)
-    jitter = rng.normal(scale=0.45, size=(n_contexts, n_item_features))
+    jitter = rng.normal(scale=segment_jitter, size=(n_contexts, n_item_features))
     context_features = unit_rows(centroids[segment] + jitter)
 
     return World(

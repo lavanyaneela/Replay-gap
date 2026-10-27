@@ -63,7 +63,7 @@
   "ess_fraction_at_earliest_crossover": 0.1229554634476748,
   "n_crossings_with_healthy_ess": 3,
   "n_crossings_where_ess_rose": 3,
-  "seconds": 0.9133237489995736,
+  "seconds": 0.932367843000975,
   "rows": [
     {
       "policy": "popularity",

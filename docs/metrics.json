@@ -1,7 +1,7 @@
 {
   "metrics": {
-    "tests_total": 355,
-    "tests_executed": 354,
+    "tests_total": 372,
+    "tests_executed": 371,
     "coverage_line_pct": 1.0,
     "incumbent_naive_lift": 0.05525198631872463,
     "incumbent_naive_matched": 17187,
@@ -49,8 +49,8 @@
     "e5_crossed": 3
   },
   "formatted": {
-    "tests_total": "355",
-    "tests_executed": "354",
+    "tests_total": "372",
+    "tests_executed": "371",
     "coverage_line_pct": "100%",
     "incumbent_naive_lift": "+5.53%",
     "incumbent_naive_matched": "17,187",
@@ -99,11 +99,11 @@
   },
   "anchors": {
     "tests_total": [
-      "355 tests"
+      "372 tests"
     ],
     "tests_executed": [
-      "354 of them run",
-      "354 tests run"
+      "371 of them run",
+      "371 tests run"
     ],
     "coverage_line_pct": [
       "100% line coverage",
@@ -140,7 +140,8 @@
     ],
     "sharp_ips_lift": [
       "IPS reports -9.95%",
-      "IPS says -9.95%"
+      "IPS says -9.95%",
+      "a lift of -9.95%"
     ],
     "sharp_true_lift": [
       "true lift is +21.53%",
@@ -153,6 +154,8 @@
     ],
     "clone_true_lift": [
       "true lift of -0.05%",
+      "true lift is -0.05%",
+      "a -0.05% policy",
       "actually -0.05%"
     ],
     "clone_ess_fraction": [
@@ -218,7 +221,9 @@
     ],
     "e2_end_ess_fraction_sharpened": [
       "ends at 1.62%",
-      "down to 1.62%"
+      "down to 1.62%",
+      "which is 1.62% of the log",
+      "sample size is 1.62%"
     ],
     "e2_naive_lift_at_end": [
       "still reports +18.20%",
@@ -246,8 +251,8 @@
       "16.39% apart"
     ],
     "e3_oracle_sharp_snips_rmse": [
-      "SNIPS at 3.78%",
-      "3.78% against"
+      "SNIPS is at 3.78%",
+      "SNIPS at 3.78%"
     ],
     "e3_oracle_sharp_dr_rmse": [
       "4.44% for the doubly robust",
@@ -311,7 +316,16 @@
     "e3_row_oracle": "| oracle | +12.21% | 4.86% | 4.96% | 1.94% | 1.73% |",
     "e3_row_oracle_sharp": "| oracle, greedily served | +28.59% | 11.87% | 15.38% | 3.78% | 4.44% |",
     "e3_row_contrarian_lift": "| contrarian_lift | +7.64% | 11.33% | 15.06% | 3.22% | 2.19% |",
-    "e3_row_contrarian_sharp": "| contrarian_sharp | +21.18% | 3.05% | 54.71% | 7.61% | 3.13% |"
+    "e3_row_contrarian_sharp": "| contrarian_sharp | +21.18% | 3.05% | 54.71% | 7.61% | 3.13% |",
+    "cli_incumbent_naive": "naive replay lift       +5.53%   (on 17,187 matched sessions, 34.4% of the log)",
+    "cli_incumbent_true": "true lift (referee)     +0.00%",
+    "cli_incumbent_ess": "effective sample size   50,000 of 50,000 (100.00%)",
+    "cli_sharp_naive": "naive replay lift       +19.64%   (on 4,342 matched sessions, 8.7% of the log)",
+    "cli_sharp_true": "true lift (referee)     +21.53%",
+    "cli_sharp_ess": "effective sample size   810 of 50,000 (1.62%)",
+    "cli_incumbent_snips": "corrected lift (SNIPS)  +0.00%   95% interval [+0.00%, +0.00%]",
+    "cli_sharp_snips": "corrected lift (SNIPS)  +25.97%   95% interval [+20.40%, +30.93%]",
+    "cli_logged_mean_reward": "logged mean reward      1.07396"
   },
   "descriptions": {
     "tests_total": "tests in the suite",
@@ -380,7 +394,16 @@
     "e3_row_oracle": "E3 estimator comparison row for oracle",
     "e3_row_oracle_sharp": "E3 estimator comparison row for oracle_sharp",
     "e3_row_contrarian_lift": "E3 estimator comparison row for contrarian_lift",
-    "e3_row_contrarian_sharp": "E3 estimator comparison row for contrarian_sharp"
+    "e3_row_contrarian_sharp": "E3 estimator comparison row for contrarian_sharp",
+    "cli_incumbent_naive": "README CLI block for incumbent: the naive replay line",
+    "cli_incumbent_true": "README CLI block for incumbent: the referee line",
+    "cli_incumbent_ess": "README CLI block for incumbent: the effective sample size line",
+    "cli_sharp_naive": "README CLI block for contrarian_sharp: the naive replay line",
+    "cli_sharp_true": "README CLI block for contrarian_sharp: the referee line",
+    "cli_sharp_ess": "README CLI block for contrarian_sharp: the effective sample size line",
+    "cli_incumbent_snips": "README CLI block for the incumbent: the corrected estimate line",
+    "cli_sharp_snips": "README CLI block for the refused policy: the corrected estimate line",
+    "cli_logged_mean_reward": "README CLI block: the logged mean reward line"
   },
   "checked_documents": [
     "README.md",

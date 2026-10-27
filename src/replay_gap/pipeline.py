@@ -231,6 +231,7 @@ def build_policies(config: Config, fixture: Fixture, with_ranker: bool = True) -
         counts,
         config.policies.temperature,
         config.policies.sharp_temperature,
+        config.policies.clone_noise,
     )
     if with_ranker:
         model = train_lightgbm_ranker(fixture.world, fixture.log, config.ranker)

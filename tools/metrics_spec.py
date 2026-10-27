@@ -42,7 +42,7 @@ class Metric:
             return f"{int(round(value))}"
         if self.unit == "thousands":
             return f"{int(round(value)):,}"
-        if self.unit == "ratio":
+        if self.unit in {"ratio", "float"}:
             return f"{value:.{self.digits}f}"
         return f"{value:.{self.digits}f}"
 
@@ -192,7 +192,7 @@ METRICS: tuple[Metric, ...] = (
         path=("contrarian_sharp", "lifts", "ips"),
         description="what plain IPS reports for the refused policy",
         unit="signed_percent",
-        anchors=("IPS reports {}", "IPS says {}"),
+        anchors=("IPS reports {}", "IPS says {}", "a lift of {}"),
     ),
     Metric(
         key="sharp_true_lift",
@@ -217,7 +217,7 @@ METRICS: tuple[Metric, ...] = (
         path=("incumbent_clone", "true_lift"),
         description="the true lift of the noisy copy",
         unit="signed_percent",
-        anchors=("true lift of {}", "actually {}"),
+        anchors=("true lift of {}", "true lift is {}", "a {} policy", "actually {}"),
     ),
     Metric(
         key="clone_ess_fraction",
@@ -352,7 +352,7 @@ METRICS: tuple[Metric, ...] = (
         path=("end_ess_fraction_sharpened",),
         description="what the log is worth once serving is sharpened too",
         unit="percent",
-        anchors=("ends at {}", "down to {}"),
+        anchors=("ends at {}", "down to {}", "which is {} of the log", "sample size is {}"),
     ),
     Metric(
         key="e2_naive_lift_at_end",
@@ -409,7 +409,7 @@ METRICS: tuple[Metric, ...] = (
         path=("summary", "oracle_sharp", "snips_rmse"),
         description="SNIPS error on the greedily served oracle",
         unit="percent",
-        anchors=("SNIPS at {}", "{} against"),
+        anchors=("SNIPS is at {}", "SNIPS at {}"),
     ),
     Metric(
         key="e3_oracle_sharp_dr_rmse",
@@ -540,6 +540,50 @@ def _resolution_row(policy: str) -> Row:
     )
 
 
+def _cli_rows(policy: str, prefix: str) -> tuple[Row, ...]:
+    """The lines of a captured CLI block in the README, guarded exactly as printed.
+
+    These are not example invocations. They are the output of a command that ran, they carry
+    the document's headline and its refusal, and an audit found that excluding fenced blocks
+    left them as the only unchecked numbers on the first screen.
+    """
+    return (
+        Row(
+            key=f"cli_{prefix}_naive",
+            source="evaluation",
+            description=f"README CLI block for {policy}: the naive replay line",
+            template="naive replay lift       {}   (on {} matched sessions, {} of the log)",
+            cells=(
+                ("lift", (policy, "lifts", "naive"), "signed_percent", 2),
+                ("matched", (policy, "naive_matched_sessions"), "thousands", 0),
+                ("rate", (policy, "naive_match_rate"), "percent", 1),
+            ),
+        ),
+        Row(
+            key=f"cli_{prefix}_true",
+            source="evaluation",
+            description=f"README CLI block for {policy}: the referee line",
+            template="true lift (referee)     {}",
+            cells=(("true_lift", (policy, "true_lift"), "signed_percent", 2),),
+        ),
+        Row(
+            key=f"cli_{prefix}_ess",
+            source="evaluation",
+            description=f"README CLI block for {policy}: the effective sample size line",
+            template="effective sample size   {} of 50,000 ({})",
+            cells=(
+                (
+                    "ess",
+                    (policy, "overlap", "effective_sample_size"),
+                    "thousands",
+                    0,
+                ),
+                ("fraction", (policy, "overlap", "ess_fraction"), "percent", 2),
+            ),
+        ),
+    )
+
+
 def _rmse_row(policy: str, label: str) -> Row:
     """One row of the E3 estimator comparison table."""
     return Row(
@@ -614,6 +658,37 @@ ROWS: tuple[Row, ...] = (
     _rmse_row("oracle_sharp", "oracle, greedily served"),
     _rmse_row("contrarian_lift", "contrarian_lift"),
     _rmse_row("contrarian_sharp", "contrarian_sharp"),
+    *_cli_rows("incumbent", "incumbent"),
+    *_cli_rows("contrarian_sharp", "sharp"),
+    Row(
+        key="cli_incumbent_snips",
+        source="evaluation",
+        description="README CLI block for the incumbent: the corrected estimate line",
+        template="corrected lift (SNIPS)  {}   95% interval [{}, {}]",
+        cells=(
+            ("lift", ("incumbent", "lifts", "snips"), "signed_percent", 2),
+            ("low", ("incumbent", "intervals", "snips", "0"), "signed_percent", 2),
+            ("high", ("incumbent", "intervals", "snips", "1"), "signed_percent", 2),
+        ),
+    ),
+    Row(
+        key="cli_sharp_snips",
+        source="evaluation",
+        description="README CLI block for the refused policy: the corrected estimate line",
+        template="corrected lift (SNIPS)  {}   95% interval [{}, {}]",
+        cells=(
+            ("lift", ("contrarian_sharp", "lifts", "snips"), "signed_percent", 2),
+            ("low", ("contrarian_sharp", "intervals", "snips", "0"), "signed_percent", 2),
+            ("high", ("contrarian_sharp", "intervals", "snips", "1"), "signed_percent", 2),
+        ),
+    ),
+    Row(
+        key="cli_logged_mean_reward",
+        source="evaluation",
+        description="README CLI block: the logged mean reward line",
+        template="logged mean reward      {}",
+        cells=(("reward", ("logged_mean_reward",), "float", 5),),
+    ),
 )
 
 SPEC = Spec(metrics=METRICS, rows=ROWS, documents=DOCUMENTS)

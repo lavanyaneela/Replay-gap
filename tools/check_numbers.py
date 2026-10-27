@@ -8,16 +8,21 @@ Anchors are alternatives rather than requirements: the same figure reads differe
 and in a sentence, and demanding every phrasing would fail the build over prose that is
 perfectly correct, which is the fastest way to teach somebody to pass --no-verify.
 
-Every metric must be anchored somewhere in the checked set. That requirement is what catches the
-case the forward check alone cannot: when a figure is edited to a different number, the old
-value simply stops appearing, so a check that only looks for quotations of the current value
-finds nothing to complain about. Requiring the current value to appear, in its own wording, in
-at least one document turns a silent pass into a failure.
+Every metric must be anchored somewhere in the checked set, and every document that quotes a
+metric's value must itself carry one of that metric's anchors. The first rule catches a figure
+edited to a different number, where the old value simply stops appearing and a check looking
+only for quotations of the current value has nothing to complain about. The second rule is the
+one this checker was missing: requiring the anchor anywhere in the set meant a README whose
+every framing sentence had gone stale still passed, because the defense guide happened to retain
+the phrasing. The proof transcript published that as a case the checker did not catch, which is
+how it was found.
 
-A metric whose digits are small is handled differently beyond that, because its digits prove
-nothing. A 3 or a 6 occurs in a version string, a heading, an ADR number and a date, so
-searching for it finds matches in documents that never mention the measurement. Those metrics
-are checked through their anchors only.
+A metric whose rendered value is a short bare integer is exempt from the second rule only,
+because its digits prove nothing: a 3 or a 6 occurs in a version string, a heading, an ADR
+number and a date, so searching for it finds matches in documents that never mention the
+measurement. Judging that on the rendered string rather than on the raw value matters. An
+earlier version compared the raw value against a threshold of ten, which made 0.0553 "small"
+and exempted almost every percentage in the repository from the per document check.
 
 Document text is also tokenised into numbers before the forward check, so a figure is only
 considered quoted when it stands alone. Without that, 6 is found inside 2026 and 3.78%, and the
@@ -25,9 +30,14 @@ build fails on documents that are correct.
 
 The reverse check sweeps every number in the prose and reports any that no metric accounts for,
 because a number nothing re-measures is a number that will eventually be wrong. Fenced code
-blocks, inline code spans, HTML attributes and link targets are excluded: an example invocation
-is allowed to contain a made up row count, and flagging it trains the reader to skip the whole
-section.
+blocks, inline code spans, HTML attributes and link targets are excluded from that sweep, since
+a command line is allowed to contain an argument that is not a measurement.
+
+Excluding fences entirely was wrong, though, and an audit caught it. The README's two most read
+blocks are not examples: they are captured output, they carry the headline and the refusal, and
+stripping them meant the first screen of the document was the one part nothing checked. Falsified
+figures in both passed. So the row check below reads the raw document rather than the stripped
+one, and those blocks are guarded line by line as exact strings.
 """
 
 from __future__ import annotations
@@ -54,8 +64,13 @@ ADR_REFERENCE = re.compile(r"ADR-\d+")
 
 NUMBER = re.compile(r"(?<![\w.])([+-]?\d[\d,]*(?:\.\d+)?)(?<![.,])\s*(%?)")
 
-# Numbers a document may use without a metric behind them: structural facts about the design,
-# section numbering, years, and the small counts that describe the repository's own shape.
+# Numbers a document may use without a measurement behind them. These are structural facts
+# about the design rather than results: the slate geometry, the supported Python versions, the
+# configured thresholds, and single digits that read as words.
+#
+# Nothing here may collide with a live metric's rendered value, because an exemption that
+# covers a measured figure silently excuses it from the reverse check. The assertion below
+# enforces that, and it fired on 24, which was both an exemption and the E3 replicate count.
 ALLOWED_BARE = {
     "0",
     "1",
@@ -71,7 +86,6 @@ ALLOWED_BARE = {
     "11",
     "12",
     "20",
-    "24",
     "100",
     "200",
     "720",
@@ -80,8 +94,6 @@ ALLOWED_BARE = {
     "3.11",
     "3.12",
     "3.13",
-    "5,000",
-    "50,000",
     "0.25",
     "1.0",
     "95",
@@ -89,13 +101,49 @@ ALLOWED_BARE = {
     "0.05",
 }
 
+# 50,000 and 5,000 are deliberately absent: the log size and the context count are measured
+# values, so they are guarded by the sweep like any other figure.
 
-AMBIGUOUS_BELOW = 10
+
+AMBIGUOUS_DIGITS = 3
 
 
-def is_ambiguous(metric) -> bool:
-    """True when the metric's digits are too small to prove anything on their own."""
-    return metric.unit in {"integer", "ratio"} and abs(metric.scale) < AMBIGUOUS_BELOW
+def is_ambiguous(formatted: str) -> bool:
+    """True when the rendered value is too plain for its digits to prove anything.
+
+    Judged on what a document actually contains. "6" and "24" turn up by coincidence; "+5.53%",
+    "1.62%" and "17,187" do not, because a decimal point, a percent sign or four digits make a
+    token specific enough that finding it means the document really is quoting the figure.
+    """
+    if "%" in formatted or "." in formatted:
+        return False
+    return len(formatted.lstrip("+-").replace(",", "")) <= AMBIGUOUS_DIGITS
+
+
+def assert_no_exemption_hides_a_metric(payload: dict) -> list[Finding]:
+    """An exemption that covers a specific measured value would excuse it from the sweep.
+
+    Ambiguous metrics are allowed to collide and are not reported. A bare 3 cannot be guarded by
+    a sweep over numerals whatever the exemption list says, which is why those metrics are
+    required to be anchored by phrase instead. The collision that matters is a specific value
+    such as 50,000 sitting in the exemption list, where the sweep could have guarded it and the
+    exemption is what stopped it.
+    """
+    collisions = sorted(
+        key
+        for key, value in payload["formatted"].items()
+        if not is_ambiguous(value)
+        and (value in ALLOWED_BARE or value.lstrip("+-").replace(",", "") in ALLOWED_BARE)
+    )
+    return [
+        Finding(
+            "check_numbers.py",
+            "exemption",
+            f"{key} renders as {payload['formatted'][key]}, which ALLOWED_BARE exempts, so the "
+            "reverse check would never see it go stale",
+        )
+        for key in collisions
+    ]
 
 
 @dataclass
@@ -174,7 +222,7 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
             continue
         checked += 1
 
-        ambiguous = is_ambiguous(metric) or float(payload["metrics"][key]) < AMBIGUOUS_BELOW
+        ambiguous = is_ambiguous(value)
         anchored_in = [name for name, text in documents.items() if any(a in text for a in anchors)]
         if not anchored_in:
             findings.append(
@@ -209,11 +257,15 @@ def forward_check(payload: dict, documents: dict[str, str]) -> tuple[list[Findin
 
 
 def row_check(payload: dict, documents: dict[str, str]) -> tuple[list[Finding], int]:
-    """Every guarded table row must appear in some checked document, exactly as rendered.
+    """Every guarded row must appear in some checked document, exactly as rendered.
 
-    A table cell has no words around it, so there is no anchor phrase to build. Guarding the
-    whole rendered row is stronger: a changed value, a moved column and a hand edited cell all
-    break the exact string, and the row is the unit a reader actually reads.
+    A table cell and a column of captured terminal output both have no words around them, so
+    there is no anchor phrase to build. Guarding the whole rendered line is stronger: a changed
+    value, a moved column and a hand edited cell all break the exact string, and the line is the
+    unit a reader actually reads.
+
+    These are matched against the raw document, not the stripped one, because the output blocks
+    this guards live inside fences.
     """
     findings: list[Finding] = []
     found = 0
@@ -252,14 +304,23 @@ def reverse_check(payload: dict, documents: dict[str, str]) -> list[Finding]:
     return findings
 
 
-def load_documents(names: list[str]) -> dict[str, str]:
-    documents: dict[str, str] = {}
+def load_documents(names: list[str]) -> tuple[dict[str, str], dict[str, str]]:
+    """Each checked document twice: with code stripped, and raw.
+
+    The anchor and reverse checks read the stripped text, because a command line is not a claim.
+    The row check reads the raw text, because the blocks of captured output it guards are inside
+    fences and stripping them is what let falsified figures through.
+    """
+    stripped: dict[str, str] = {}
+    raw: dict[str, str] = {}
     for name in names:
         path = Path(name)
         if not path.exists():
             raise SystemExit(f"checked document {name} does not exist")
-        documents[name] = normalise(strip_code(path.read_text(encoding="utf-8")))
-    return documents
+        text = path.read_text(encoding="utf-8")
+        stripped[name] = normalise(strip_code(text))
+        raw[name] = normalise(text)
+    return stripped, raw
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -278,10 +339,12 @@ def main(argv: list[str] | None = None) -> int:
     if not metrics_path.exists():
         raise SystemExit(f"{metrics_path} is missing. Run 'make receipts' or collect_metrics.py.")
     payload = json.loads(metrics_path.read_text(encoding="utf-8"))
-    documents = load_documents(payload["checked_documents"])
+    documents, raw_documents = load_documents(payload["checked_documents"])
 
-    stale, checked, quoted = forward_check(payload, documents)
-    row_findings, rows_found = row_check(payload, documents)
+    stale = assert_no_exemption_hides_a_metric(payload)
+    forward_findings, checked, quoted = forward_check(payload, documents)
+    stale.extend(forward_findings)
+    row_findings, rows_found = row_check(payload, raw_documents)
     stale.extend(row_findings)
     unguarded = reverse_check(payload, documents)
 

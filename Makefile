@@ -17,7 +17,7 @@ help:
 	@echo "prove-receipts  corrupt the README five ways and watch the checker fail each one"
 	@echo "verify       lint + test + receipts. This is the command the README promises."
 	@echo "evidence     regenerate the diagram, screenshots and demo replay (needs extras)"
-	@echo "set-handle   replace the testhandle placeholder: make set-handle HANDLE=you"
+	@echo "set-handle   point the badge and clone URLs at a real account (HANDLE=you)"
 
 install:
 	$(PYTHON) -m pip install -e ".[dev]"
@@ -62,14 +62,21 @@ evidence:
 	$(PYTHON) tools/capture_screenshots.py
 	$(PYTHON) tools/record_demo.py
 
-# The repository ships with testhandle as a placeholder, because the author's handle is not
-# something this repository should guess. One command replaces it everywhere, including in the
-# badge URLs, where a wrong name renders as "unknown" and is the first thing a reviewer notices.
+# The repository ships with a placeholder account name, because the author's GitHub handle is
+# not a fact this repository has, and a wrong name in a badge URL renders as "unknown", which
+# is the first thing a reviewer notices.
+#
+# The file list is explicit rather than a repository wide grep. The first version grepped
+# everything, matched this Makefile's own comment, rewrote its own placeholder on the first run,
+# and then silently did nothing on every run after that while still printing success.
+HANDLE_FILES := README.md
 set-handle:
 	@test -n "$(HANDLE)" || { echo 'usage: make set-handle HANDLE=<your-github-username>'; exit 1; }
-	@git grep -l testhandle | xargs sed -i 's/testhandle/$(HANDLE)/g'
-	@echo "set the GitHub handle to $(HANDLE) in:"
-	@git grep -l "$(HANDLE)/replay-gap" || true
+	@grep -q GITHUB_USERNAME $(HANDLE_FILES) || { \
+		echo 'no GITHUB_USERNAME placeholder left in $(HANDLE_FILES); nothing to do'; exit 1; }
+	@sed -i 's|github.com/GITHUB_USERNAME/|github.com/$(HANDLE)/|g' $(HANDLE_FILES)
+	@echo "pointed the badge and clone URLs at github.com/$(HANDLE)/replay-gap"
+	@grep -n "github.com/$(HANDLE)/" $(HANDLE_FILES)
 
 clean:
 	rm -rf reports .pytest_cache .ruff_cache .coverage coverage.xml

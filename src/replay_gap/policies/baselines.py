@@ -192,6 +192,7 @@ def build_baseline_policies(
     click_counts: np.ndarray,
     temperature: float = 1.0,
     sharp_temperature: float = 0.25,
+    clone_noise: float = 0.10,
 ) -> dict[str, Policy]:
     """The fixed baseline set, in the order the report prints them.
 
@@ -208,7 +209,7 @@ def build_baseline_policies(
             logging_policy,
             truth_weight=0.0,
             incumbent_weight=1.0,
-            noise_weight=0.10,
+            noise_weight=clone_noise,
             noise_seed=4101,
             temperature=temperature,
             name="incumbent_clone",

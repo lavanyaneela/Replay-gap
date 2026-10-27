@@ -29,6 +29,7 @@ class WorldConfig:
     n_contexts: int = 5000
     relevance_scale: float = 2.4
     quality_spread: float = 0.55
+    segment_jitter: float = 0.45
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,7 @@ class LogConfig:
 class PoliciesConfig:
     temperature: float = 1.0
     sharp_temperature: float = 0.25
+    clone_noise: float = 0.10
 
 
 @dataclass(frozen=True)
@@ -169,6 +171,10 @@ class Config:
             raise ConfigError("diagnostics.power must lie strictly between 0 and 1")
         if self.log.n_sessions < 1:
             raise ConfigError("log.n_sessions must be at least 1")
+        if self.world.segment_jitter < 0:
+            raise ConfigError("world.segment_jitter must not be negative")
+        if self.policies.clone_noise < 0:
+            raise ConfigError("policies.clone_noise must not be negative")
 
     @property
     def n_permutations(self) -> int:

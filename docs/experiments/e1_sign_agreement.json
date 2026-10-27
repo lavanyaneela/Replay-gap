@@ -24,7 +24,7 @@
   "worst_overclaim_naive_lift": 0.06244238844696315,
   "worst_shipped_true_lift": -0.10795018110061516,
   "worst_shipped_naive_lift": 0.06244238844696315,
-  "seconds": 52.945688883,
+  "seconds": 59.88581875900036,
   "rows": [
     {
       "policy": "blend_000",

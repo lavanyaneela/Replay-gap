@@ -198,6 +198,14 @@ matches phrases rather than digits, because searching for digits passes while th
 around them goes stale, and a reverse check fails on any number in the prose that no measurement
 accounts for.
 
+**If pushed on "who checks the checker":** an audit did, and found two holes. The anchor rule
+required a phrase to appear somewhere in the checked set rather than in the document making the
+claim, so a README whose every framing sentence had gone stale passed because the defense guide
+still carried the wording. And fenced blocks were stripped before checking, which left the two
+blocks of captured output on the README's first screen as the only unguarded numbers in the
+document. Both are fixed, both now have a case in the transcript, and a test asserts that every
+case in the transcript is a failure.
+
 ## Things to say, and things not to say
 
 **Say:**

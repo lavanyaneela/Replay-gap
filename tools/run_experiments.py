@@ -12,6 +12,13 @@ import argparse
 import importlib
 import sys
 import time
+from pathlib import Path
+
+# The experiments live at the repository root, not inside the installed package, and running a
+# script puts that script's directory on sys.path rather than the root. Without this line the
+# target that regenerates every experiment figure fails with ModuleNotFoundError, which is a
+# break that full coverage of src/ cannot see because nothing under src/ imports this.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 EXPERIMENTS = (
     "e1_sign_agreement",

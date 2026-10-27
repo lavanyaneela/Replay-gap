@@ -118,7 +118,7 @@ def dig(payload: dict, path: tuple[str, ...], where: str):
     """
     cursor = payload
     for key in path:
-        if isinstance(cursor, list) and key.lstrip("-").isdigit():
+        if isinstance(cursor, list | tuple) and key.lstrip("-").isdigit():
             index = int(key)
             if not -len(cursor) <= index < len(cursor):
                 raise SystemExit(f"{where} has no element {index} at {'.'.join(path)}")

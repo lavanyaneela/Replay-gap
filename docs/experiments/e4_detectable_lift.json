@@ -27,7 +27,7 @@
   "best_minimum_detectable_lift": 0.0014605441821662168,
   "median_minimum_detectable_lift": 0.020926366958518173,
   "policies_above_target": 5,
-  "seconds": 19.690572681999583,
+  "seconds": 18.38535739300096,
   "by_policy": {
     "incumbent": {
       "policy": "incumbent",

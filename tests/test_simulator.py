@@ -43,6 +43,49 @@ def test_unit_rows_leaves_a_zero_row_finite_rather_than_dividing_by_zero():
     assert np.all(np.isfinite(unit_rows(np.zeros((2, 3)))))
 
 
+def test_a_negative_segment_jitter_is_rejected():
+    from replay_gap.config import Config, WorldConfig
+    from replay_gap.errors import ConfigError
+
+    with pytest.raises(ConfigError, match="segment_jitter"):
+        Config(world=WorldConfig(segment_jitter=-0.1))
+
+
+def test_a_negative_clone_noise_is_rejected():
+    from replay_gap.config import Config, PoliciesConfig
+    from replay_gap.errors import ConfigError
+
+    with pytest.raises(ConfigError, match="clone_noise"):
+        Config(policies=PoliciesConfig(clone_noise=-0.1))
+
+
+def test_a_wider_segment_jitter_makes_users_less_like_their_segment(small_config):
+    """The knob that decides whether a ranker trained on the log has anything real to find."""
+    from replay_gap.simulator.user_model import build_world
+
+    def within_segment_similarity(jitter: float) -> float:
+        world = build_world(
+            n_items=20,
+            n_item_features=5,
+            n_segments=3,
+            n_contexts=180,
+            relevance_scale=2.0,
+            quality_spread=0.5,
+            segment_jitter=jitter,
+            examination=np.array([1.0]),
+            rng=np.random.default_rng(1),
+        )
+        same = [
+            float(world.context_features[a] @ world.context_features[b])
+            for a in range(60)
+            for b in range(a + 1, 60)
+            if world.context_segment[a] == world.context_segment[b]
+        ]
+        return float(np.mean(same))
+
+    assert within_segment_similarity(0.1) > within_segment_similarity(1.2)
+
+
 def test_the_world_reports_its_own_shape(small_world, small_config):
     assert small_world.n_items == small_config.world.n_items
     assert small_world.n_contexts == small_config.world.n_contexts
@@ -120,7 +163,7 @@ def test_draw_clicks_rejects_a_relevance_array_that_is_not_two_dimensional(small
 
 def test_building_a_world_with_no_segments_is_rejected():
     with pytest.raises(ValueError, match="n_segments"):
-        build_world(10, 3, 0, 5, 2.0, 0.5, np.array([1.0]), np.random.default_rng(0))
+        build_world(10, 3, 0, 5, 2.0, 0.5, 0.45, np.array([1.0]), np.random.default_rng(0))
 
 
 def test_candidate_sets_hold_distinct_items(rng):
